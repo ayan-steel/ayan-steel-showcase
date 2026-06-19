@@ -1,0 +1,53 @@
+import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import type { Product } from "@/data/showroom";
+
+export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative overflow-hidden rounded-3xl bg-card border border-border/60 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-luxe)] transition-all duration-500"
+    >
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+        <img
+          src={product.image}
+          alt={product.name}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+        />
+        {product.badge && (
+          <span className="absolute left-4 top-4 rounded-full bg-foreground/90 backdrop-blur px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-background">
+            {product.badge}
+          </span>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute right-4 bottom-4 grid h-11 w-11 place-items-center rounded-full bg-background/95 text-foreground translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+          <ArrowUpRight className="h-5 w-5" />
+        </div>
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {product.category}
+          </span>
+          <span className="text-[11px] text-muted-foreground">{product.brand}</span>
+        </div>
+        <h3 className="mt-2 font-display text-xl leading-tight">{product.name}</h3>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-lg font-medium">
+            ₹{(product.salePrice ?? product.price).toLocaleString("en-IN")}
+          </span>
+          {product.salePrice && (
+            <span className="text-sm text-muted-foreground line-through">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
