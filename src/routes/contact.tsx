@@ -83,21 +83,20 @@ function ContactPage() {
               loading="lazy"
             />
           </div>
-          <form
-            className="p-8 space-y-4"
-            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-          >
+          <form className="p-8 space-y-4" onSubmit={onSubmit}>
             <h2 className="font-display text-2xl">Send a message</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <input required placeholder="Your name" className="rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
-              <input required type="tel" placeholder="Phone" className="rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
+              <input required placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={100} className="rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
+              <input required type="tel" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={30} className="rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
             </div>
-            <textarea required rows={4} placeholder="What are you looking for?" className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
+            <input type="email" placeholder="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} className="w-full rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
+            <textarea required rows={4} placeholder="What are you looking for?" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} maxLength={2000} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background hover:scale-[1.03] transition"
+              disabled={busy}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background hover:scale-[1.03] transition disabled:opacity-50"
             >
-              <Send className="h-4 w-4" /> {sent ? "Thank you!" : "Send Message"}
+              <Send className="h-4 w-4" /> {busy ? "Sending…" : sent ? "Thank you!" : "Send Message"}
             </button>
             {sent && <p className="text-sm text-muted-foreground">We'll get back to you shortly.</p>}
           </form>
