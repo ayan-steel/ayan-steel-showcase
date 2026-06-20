@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Phone, MessageCircle, MapPin, Clock, Instagram, Send } from "lucide-react";
 import { CONTACT } from "@/data/showroom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -15,6 +17,29 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("messages").insert({
+        name: form.name.trim(),
+        email: form.email.trim() || `${form.phone}@phone.local`,
+        phone: form.phone.trim() || null,
+        message: form.message.trim(),
+      });
+      if (error) throw error;
+      setSent(true);
+      toast.success("Message sent. We'll be in touch shortly.");
+      setForm({ name: "", phone: "", email: "", message: "" });
+    } catch (err: any) {
+      toast.error(err?.message || "Could not send message");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <section className="container-luxe py-16 md:py-24">
       <header className="max-w-2xl">
