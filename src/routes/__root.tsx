@@ -21,6 +21,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { FloatingActions } from "@/components/floating-actions";
+import { Toaster } from "@/components/ui/sonner";
+import { useRouterState } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
