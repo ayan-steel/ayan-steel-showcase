@@ -112,14 +112,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const chrome = !pathname.startsWith("/admin") && !pathname.startsWith("/auth");
   return (
     <QueryClientProvider client={queryClient}>
-      <SiteHeader />
-      <main className="min-h-screen pt-20">
+      {chrome && <SiteHeader />}
+      <main className={chrome ? "min-h-screen pt-20" : "min-h-screen"}>
         <Outlet />
       </main>
-      <SiteFooter />
-      <FloatingActions />
+      {chrome && <SiteFooter />}
+      {chrome && <FloatingActions />}
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
 }
