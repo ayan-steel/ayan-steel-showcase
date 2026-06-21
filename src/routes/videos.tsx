@@ -4,6 +4,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Play } from "lucide-react";
 import { featuredProductsQuery, type ShowroomProduct } from "@/lib/showroom-queries";
 import { getSignedUrl } from "@/lib/storage";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { PageHeaderSkeleton, TileGridSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/videos")({
   head: () => ({
@@ -13,8 +15,15 @@ export const Route = createFileRoute("/videos")({
     ],
   }),
   loader: ({ context }) => { context.queryClient.ensureQueryData(featuredProductsQuery); },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: () => (
+    <section className="container-luxe py-16 md:py-24">
+      <PageHeaderSkeleton />
+      <div className="mt-12"><TileGridSkeleton count={6} aspect="aspect-video" /></div>
+    </section>
+  ),
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load videos" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: VideosPage,
 });
 
