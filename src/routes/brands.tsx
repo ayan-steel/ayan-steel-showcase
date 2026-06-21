@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { brandsQuery, productsQuery } from "@/lib/showroom-queries";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { PageHeaderSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/brands")({
   head: () => ({
@@ -14,8 +17,17 @@ export const Route = createFileRoute("/brands")({
     context.queryClient.ensureQueryData(brandsQuery);
     context.queryClient.ensureQueryData(productsQuery);
   },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: () => (
+    <section className="container-luxe py-16 md:py-24">
+      <PageHeaderSkeleton />
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-52 rounded-3xl" />)}
+      </div>
+    </section>
+  ),
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load brands" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: BrandsPage,
 });
 

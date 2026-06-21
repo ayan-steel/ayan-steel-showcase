@@ -3,6 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { HeroSkeleton, ProductGridSkeleton, ChipGridSkeleton, PageHeaderSkeleton } from "@/components/skeletons";
 import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
@@ -29,10 +31,30 @@ export const Route = createFileRoute("/")({
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(brandsQuery);
   },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: HomePending,
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load the showroom" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: Home,
 });
+
+function HomePending() {
+  return (
+    <>
+      <HeroSkeleton />
+      <section className="container-luxe py-24 md:py-32">
+        <PageHeaderSkeleton />
+        <div className="mt-12"><ProductGridSkeleton count={3} /></div>
+      </section>
+      <section className="bg-foreground py-24 md:py-32">
+        <div className="container-luxe">
+          <PageHeaderSkeleton />
+          <div className="mt-12"><ChipGridSkeleton /></div>
+        </div>
+      </section>
+    </>
+  );
+}
 
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);

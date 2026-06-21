@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { productsQuery, type ShowroomProduct } from "@/lib/showroom-queries";
 import { getSignedUrl } from "@/lib/storage";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { PageHeaderSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -14,8 +17,19 @@ export const Route = createFileRoute("/gallery")({
     ],
   }),
   loader: ({ context }) => { context.queryClient.ensureQueryData(productsQuery); },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: () => (
+    <section className="container-luxe py-16 md:py-24">
+      <PageHeaderSkeleton />
+      <div className="mt-12 columns-2 md:columns-3 lg:columns-4 gap-4 [&>*]:mb-4">
+        {[280, 360, 220, 320, 260, 340, 300, 240].map((h, i) => (
+          <Skeleton key={i} className="w-full rounded-2xl" style={{ height: h }} />
+        ))}
+      </div>
+    </section>
+  ),
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load the gallery" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: GalleryPage,
 });
 
