@@ -1,8 +1,20 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import type { Product } from "@/data/showroom";
+import { getSignedUrl } from "@/lib/storage";
+import type { ShowroomProduct } from "@/lib/showroom-queries";
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+export function ProductCard({ product, index = 0 }: { product: ShowroomProduct; index?: number }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!product.image) { setSrc(""); return; }
+    getSignedUrl(product.image).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [product.image]);
+
+  const displayPrice = product.salePrice ?? product.price;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -12,12 +24,16 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       className="group relative overflow-hidden rounded-3xl bg-card border border-border/60 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-luxe)] transition-all duration-500"
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
-        <img
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-        />
+        {src ? (
+          <img
+            src={src}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
+        )}
         {product.badge && (
           <span className="absolute left-4 top-4 rounded-full bg-foreground/90 backdrop-blur px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-background">
             {product.badge}
@@ -37,16 +53,18 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <span className="text-[11px] text-muted-foreground">{product.brand}</span>
         </div>
         <h3 className="mt-2 font-display text-xl leading-tight">{product.name}</h3>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-lg font-medium">
-            ₹{(product.salePrice ?? product.price).toLocaleString("en-IN")}
-          </span>
-          {product.salePrice && (
-            <span className="text-sm text-muted-foreground line-through">
-              ₹{product.price.toLocaleString("en-IN")}
+        {displayPrice !== null && (
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-lg font-medium">
+              ₹{displayPrice.toLocaleString("en-IN")}
             </span>
-          )}
-        </div>
+            {product.salePrice && product.price && (
+              <span className="text-sm text-muted-foreground line-through">
+                ₹{product.price.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </motion.article>
   );

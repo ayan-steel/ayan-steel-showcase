@@ -1,9 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
-import { PRODUCTS, CATEGORIES, BRANDS, TESTIMONIALS, CONTACT } from "@/data/showroom";
+import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
+import {
+  featuredProductsQuery,
+  categoriesQuery,
+  brandsQuery,
+  type ShowroomProduct,
+  type ShowroomCategory,
+  type ShowroomBrand,
+} from "@/lib/showroom-queries";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,19 +24,28 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "preload", as: "image", href: heroImage, fetchpriority: "high" }],
   }),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(featuredProductsQuery);
+    context.queryClient.ensureQueryData(categoriesQuery);
+    context.queryClient.ensureQueryData(brandsQuery);
+  },
+  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
   component: Home,
 });
 
 function Home() {
-  const featured = PRODUCTS.slice(0, 6);
+  const { data: featured } = useSuspenseQuery(featuredProductsQuery);
+  const { data: categories } = useSuspenseQuery(categoriesQuery);
+  const { data: brands } = useSuspenseQuery(brandsQuery);
   return (
     <>
       <Hero />
       <Marquee />
       <Featured products={featured} />
-      <CategoriesSection />
+      <CategoriesSection categories={categories} />
       <WhyUs />
-      <Brands />
+      <Brands brands={brands} />
       <Testimonials />
       <ContactCta />
     </>
@@ -82,7 +100,6 @@ function Hero() {
         </motion.div>
       </div>
 
-      {/* scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-background/60"
@@ -125,7 +142,7 @@ function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string
   );
 }
 
-function Featured({ products }: { products: typeof PRODUCTS }) {
+function Featured({ products }: { products: ShowroomProduct[] }) {
   return (
     <section className="container-luxe py-24 md:py-32">
       <div className="flex items-end justify-between gap-6 flex-wrap">
@@ -138,43 +155,53 @@ function Featured({ products }: { products: typeof PRODUCTS }) {
           See all products →
         </Link>
       </div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-      </div>
+      {products.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-border p-16 text-center text-muted-foreground">
+          No featured products yet. Add some from the admin dashboard.
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+        </div>
+      )}
     </section>
   );
 }
 
-function CategoriesSection() {
+function CategoriesSection({ categories }: { categories: ShowroomCategory[] }) {
   return (
     <section className="bg-foreground text-background py-24 md:py-32">
       <div className="container-luxe">
         <SectionHeader
           eyebrow="Shop by Category"
           title="From steel almirahs to walnut dining."
-          sub="Nineteen carefully curated categories — there's a piece for every room and every purpose."
+          sub="Carefully curated categories — there's a piece for every room and every purpose."
         />
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {CATEGORIES.map((c, i) => (
-            <motion.div
-              key={c}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.03 }}
-            >
-              <Link
-                to="/categories"
-                className="group block rounded-2xl border border-background/15 bg-background/[0.04] px-4 py-5 text-sm hover:bg-background/10 hover:border-accent/40 transition-all"
+        {categories.length === 0 ? (
+          <p className="text-background/60">No categories yet.</p>
+        ) : (
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {categories.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.03 }}
               >
-                <div className="flex items-center justify-between">
-                  <span>{c}</span>
-                  <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-accent" />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                <Link
+                  to="/categories"
+                  className="group block rounded-2xl border border-background/15 bg-background/[0.04] px-4 py-5 text-sm hover:bg-background/10 hover:border-accent/40 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{c.name}</span>
+                    <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-accent" />
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -212,17 +239,21 @@ function WhyUs() {
   );
 }
 
-function Brands() {
+function Brands({ brands }: { brands: ShowroomBrand[] }) {
   return (
     <section className="container-luxe pb-24 md:pb-32">
       <SectionHeader eyebrow="Brands We Carry" title="Names you already trust." />
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-        {BRANDS.map((b) => (
-          <div key={b} className="rounded-2xl border border-border bg-card px-6 py-8 text-center font-display text-lg hover:border-accent transition-colors">
-            {b}
-          </div>
-        ))}
-      </div>
+      {brands.length === 0 ? (
+        <p className="text-muted-foreground">No brands yet.</p>
+      ) : (
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          {brands.map((b) => (
+            <div key={b.id} className="rounded-2xl border border-border bg-card px-6 py-8 text-center font-display text-lg hover:border-accent transition-colors">
+              {b.name}
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
