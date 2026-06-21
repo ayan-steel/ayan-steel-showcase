@@ -38,6 +38,24 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+function HomePending() {
+  return (
+    <>
+      <HeroSkeleton />
+      <section className="container-luxe py-24 md:py-32">
+        <PageHeaderSkeleton />
+        <div className="mt-12"><ProductGridSkeleton count={3} /></div>
+      </section>
+      <section className="bg-foreground py-24 md:py-32">
+        <div className="container-luxe">
+          <PageHeaderSkeleton />
+          <div className="mt-12"><ChipGridSkeleton /></div>
+        </div>
+      </section>
+    </>
+  );
+}
+
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
