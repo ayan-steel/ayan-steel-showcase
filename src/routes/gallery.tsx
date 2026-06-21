@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { PRODUCTS } from "@/data/showroom";
+import { productsQuery, type ShowroomProduct } from "@/lib/showroom-queries";
+import { getSignedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -11,12 +13,40 @@ export const Route = createFileRoute("/gallery")({
       { name: "description", content: "A visual gallery of furniture and showroom moments from Ayan Steel, Katihar." },
     ],
   }),
+  loader: ({ context }) => { context.queryClient.ensureQueryData(productsQuery); },
+  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
   component: GalleryPage,
 });
 
+function GalleryThumb({ path, name, onClick, index }: { path: string; name: string; onClick: (url: string) => void; index: number }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    getSignedUrl(path).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [path]);
+  if (!src) return null;
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
+      onClick={() => onClick(src)}
+      className="group block w-full overflow-hidden rounded-2xl border border-border bg-card"
+    >
+      <img src={src} alt={name} loading="lazy" className="w-full transition-transform duration-[1200ms] group-hover:scale-110" />
+    </motion.button>
+  );
+}
+
 function GalleryPage() {
-  // duplicate for masonry richness
-  const images = [...PRODUCTS, ...PRODUCTS].map((p, i) => ({ ...p, key: `${p.id}-${i}` }));
+  const { data: products } = useSuspenseQuery(productsQuery);
+  const items: { key: string; path: string; name: string }[] = [];
+  products.forEach((p: ShowroomProduct) => {
+    p.images.forEach((path, i) => items.push({ key: `${p.id}-${i}`, path, name: p.name }));
+  });
   const [active, setActive] = useState<string | null>(null);
 
   return (
@@ -27,26 +57,17 @@ function GalleryPage() {
         <p className="mt-4 text-muted-foreground">Click any image to view it full size.</p>
       </header>
 
-      <div className="mt-12 columns-2 md:columns-3 lg:columns-4 gap-4 [&>*]:mb-4">
-        {images.map((p, i) => (
-          <motion.button
-            key={p.key}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: (i % 8) * 0.05 }}
-            onClick={() => setActive(p.image)}
-            className="group block w-full overflow-hidden rounded-2xl border border-border bg-card"
-          >
-            <img
-              src={p.image}
-              alt={p.name}
-              loading="lazy"
-              className="w-full transition-transform duration-[1200ms] group-hover:scale-110"
-            />
-          </motion.button>
-        ))}
-      </div>
+      {items.length === 0 ? (
+        <div className="mt-16 rounded-3xl border border-dashed border-border p-16 text-center text-muted-foreground">
+          The gallery will fill up as products are added from the admin dashboard.
+        </div>
+      ) : (
+        <div className="mt-12 columns-2 md:columns-3 lg:columns-4 gap-4 [&>*]:mb-4">
+          {items.map((it, i) => (
+            <GalleryThumb key={it.key} path={it.path} name={it.name} onClick={setActive} index={i} />
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {active && (
