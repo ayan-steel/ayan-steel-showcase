@@ -4,6 +4,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { productsQuery, categoriesQuery, brandsQuery } from "@/lib/showroom-queries";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { ProductGridSkeleton, PageHeaderSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -17,8 +20,21 @@ export const Route = createFileRoute("/products")({
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(brandsQuery);
   },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: () => (
+    <section className="container-luxe py-16 md:py-24">
+      <PageHeaderSkeleton />
+      <div className="mt-10 grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
+        <Skeleton className="h-12 rounded-full" />
+        <Skeleton className="h-12 w-32 rounded-full" />
+        <Skeleton className="h-12 w-32 rounded-full" />
+        <Skeleton className="h-12 w-40 rounded-full" />
+      </div>
+      <div className="mt-8"><ProductGridSkeleton count={6} /></div>
+    </section>
+  ),
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load the catalogue" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: ProductsPage,
 });
 
