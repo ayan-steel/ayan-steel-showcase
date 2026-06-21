@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { PRODUCTS, CATEGORIES, BRANDS } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
+import { productsQuery, categoriesQuery, brandsQuery } from "@/lib/showroom-queries";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -11,26 +12,38 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "Browse the full collection of furniture and steel products at Ayan Steel — filter by category, brand and price." },
     ],
   }),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(productsQuery);
+    context.queryClient.ensureQueryData(categoriesQuery);
+    context.queryClient.ensureQueryData(brandsQuery);
+  },
+  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
   component: ProductsPage,
 });
 
 function ProductsPage() {
+  const { data: products } = useSuspenseQuery(productsQuery);
+  const { data: categories } = useSuspenseQuery(categoriesQuery);
+  const { data: brands } = useSuspenseQuery(brandsQuery);
+
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("All");
   const [brand, setBrand] = useState<string>("All");
   const [sort, setSort] = useState<"featured" | "lowhigh" | "highlow">("featured");
 
   const filtered = useMemo(() => {
-    let list = PRODUCTS.filter((p) => {
+    let list = products.filter((p) => {
       if (cat !== "All" && p.category !== cat) return false;
       if (brand !== "All" && p.brand !== brand) return false;
       if (q && !`${p.name} ${p.brand} ${p.category}`.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
     });
-    if (sort === "lowhigh") list = [...list].sort((a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price));
-    if (sort === "highlow") list = [...list].sort((a, b) => (b.salePrice ?? b.price) - (a.salePrice ?? a.price));
+    const priceOf = (p: typeof products[number]) => (p.salePrice ?? p.price ?? 0);
+    if (sort === "lowhigh") list = [...list].sort((a, b) => priceOf(a) - priceOf(b));
+    if (sort === "highlow") list = [...list].sort((a, b) => priceOf(b) - priceOf(a));
     return list;
-  }, [q, cat, brand, sort]);
+  }, [products, q, cat, brand, sort]);
 
   return (
     <section className="container-luxe py-16 md:py-24">
@@ -51,8 +64,8 @@ function ProductsPage() {
             className="w-full rounded-full border border-border bg-card pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
         </label>
-        <Select label="Category" value={cat} onChange={setCat} options={["All", ...CATEGORIES]} />
-        <Select label="Brand" value={brand} onChange={setBrand} options={["All", ...BRANDS]} />
+        <Select label="Category" value={cat} onChange={setCat} options={["All", ...categories.map((c) => c.name)]} />
+        <Select label="Brand" value={brand} onChange={setBrand} options={["All", ...brands.map((b) => b.name)]} />
         <Select
           label="Sort"
           value={sort}
@@ -68,7 +81,7 @@ function ProductsPage() {
       </div>
       {filtered.length === 0 && (
         <div className="mt-16 rounded-3xl border border-dashed border-border p-16 text-center text-muted-foreground">
-          No products match your filters.
+          {products.length === 0 ? "No products yet. Add some from the admin dashboard." : "No products match your filters."}
         </div>
       )}
     </section>
