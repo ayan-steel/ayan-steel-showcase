@@ -3,6 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
+import { ErrorState, NotFoundState } from "@/components/error-state";
+import { HeroSkeleton, ProductGridSkeleton, ChipGridSkeleton, PageHeaderSkeleton } from "@/components/skeletons";
 import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
