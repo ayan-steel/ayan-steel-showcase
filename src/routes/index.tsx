@@ -29,8 +29,10 @@ export const Route = createFileRoute("/")({
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(brandsQuery);
   },
-  errorComponent: ({ error }) => <div className="container-luxe py-24 text-center text-muted-foreground">{error.message}</div>,
-  notFoundComponent: () => <div className="container-luxe py-24 text-center">Not found.</div>,
+  pendingMs: 0,
+  pendingComponent: HomePending,
+  errorComponent: ({ error }) => <ErrorState title="We couldn't load the showroom" error={error} />,
+  notFoundComponent: () => <NotFoundState />,
   component: Home,
 });
 
