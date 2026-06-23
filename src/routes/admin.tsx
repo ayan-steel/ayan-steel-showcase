@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, LogOut, Package, Tag, Award, Image as ImageIcon, MessageSquare, LayoutDashboard, Loader2, Hammer, Video } from "lucide-react";
 import { uploadFile, deleteFile } from "@/lib/storage";
 import { SignedImage } from "@/components/signed-image";
+import { CustomWorkAdmin, VideosAdmin } from "@/components/admin-extras";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
