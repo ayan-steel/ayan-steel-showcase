@@ -588,6 +588,18 @@ function ProductDialog({ initial, categories, brands, onClose, onSave }: {
               </div>
             )}
             <Input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+            <p className="text-xs text-muted-foreground mt-1">Up to 3 images. {3 - (form.images?.length ?? 0)} slot{(3 - (form.images?.length ?? 0)) !== 1 ? "s" : ""} remaining.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div><Label>Length (cm)</Label><Input type="number" value={form.length_cm ?? ""} onChange={(e) => setForm({ ...form, length_cm: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+            <div><Label>Breadth (cm)</Label><Input type="number" value={form.breadth_cm ?? ""} onChange={(e) => setForm({ ...form, breadth_cm: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+            <div><Label>Width (cm)</Label><Input type="number" value={form.width_cm ?? ""} onChange={(e) => setForm({ ...form, width_cm: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+            <div><Label>Height (cm)</Label><Input type="number" value={form.height_cm ?? ""} onChange={(e) => setForm({ ...form, height_cm: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div><Label>Warranty</Label><Input value={form.warranty ?? ""} placeholder="5 Years" onChange={(e) => setForm({ ...form, warranty: e.target.value })} /></div>
+            <div><Label>Rating (0–5)</Label><Input type="number" step="0.1" min="0" max="5" value={form.rating ?? ""} onChange={(e) => setForm({ ...form, rating: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+            <div><Label>Material</Label><Input value={form.material ?? ""} placeholder="Steel, Wood…" onChange={(e) => setForm({ ...form, material: e.target.value })} /></div>
           </div>
           <div>
             <Label>Specifications (JSON, e.g. {`{"Material":"Steel","Warranty":"2 years"}`})</Label>

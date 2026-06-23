@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
@@ -10,11 +11,11 @@ import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
   categoriesQuery,
-  brandsQuery,
   type ShowroomProduct,
   type ShowroomCategory,
-  type ShowroomBrand,
 } from "@/lib/showroom-queries";
+import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
+import { getSignedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(featuredProductsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
-    context.queryClient.ensureQueryData(brandsQuery);
+    context.queryClient.ensureQueryData(customWorkQuery);
   },
   pendingMs: 0,
   pendingComponent: HomePending,
@@ -59,7 +60,7 @@ function HomePending() {
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
-  const { data: brands } = useSuspenseQuery(brandsQuery);
+  const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
@@ -67,7 +68,7 @@ function Home() {
       <Featured products={featured} />
       <CategoriesSection categories={categories} />
       <WhyUs />
-      <Brands brands={brands} />
+      <CustomWorkSection projects={customWork} />
       <Testimonials />
       <ContactCta />
     </>
