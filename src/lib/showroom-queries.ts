@@ -8,12 +8,21 @@ export type ShowroomProduct = {
   description: string | null;
   price: number | null;
   salePrice: number | null;
-  image: string | null; // first image path (storage) or URL
+  image: string | null;
   images: string[];
   brand: string;
   category: string;
   isFeatured: boolean;
   badge?: string;
+  // extended
+  length_cm: number | null;
+  breadth_cm: number | null;
+  width_cm: number | null;
+  height_cm: number | null;
+  warranty: string | null;
+  rating: number | null;
+  material: string | null;
+  specs: Record<string, any>;
 };
 
 export type ShowroomCategory = {
@@ -55,15 +64,25 @@ function mapProduct(row: any): ShowroomProduct {
     category: row.category?.name ?? "",
     isFeatured: !!row.is_featured,
     badge: row.is_featured ? "Featured" : !row.in_stock ? "Sold Out" : undefined,
+    length_cm: row.length_cm ?? null,
+    breadth_cm: row.breadth_cm ?? null,
+    width_cm: row.width_cm ?? null,
+    height_cm: row.height_cm ?? null,
+    warranty: row.warranty ?? null,
+    rating: row.rating ?? null,
+    material: row.material ?? null,
+    specs: (row.specs && typeof row.specs === "object") ? row.specs : {},
   };
 }
+
+const PRODUCT_SELECT = "*, brand:brands(name), category:categories(name)";
 
 export const productsQuery = queryOptions({
   queryKey: ["showroom", "products"],
   queryFn: async (): Promise<ShowroomProduct[]> => {
     const { data, error } = await supabase
       .from("products")
-      .select("*, brand:brands(name), category:categories(name)")
+      .select(PRODUCT_SELECT)
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false });
@@ -78,13 +97,28 @@ export const featuredProductsQuery = queryOptions({
   queryFn: async (): Promise<ShowroomProduct[]> => {
     const { data, error } = await supabase
       .from("products")
-      .select("*, brand:brands(name), category:categories(name)")
+      .select(PRODUCT_SELECT)
       .eq("is_active", true)
       .eq("is_featured", true)
       .order("display_order", { ascending: true })
       .limit(6);
     if (error) throw error;
     return (data ?? []).map(mapProduct);
+  },
+  staleTime: 30_000,
+});
+
+export const productBySlugQuery = (slug: string) => queryOptions({
+  queryKey: ["showroom", "product", slug],
+  queryFn: async (): Promise<ShowroomProduct | null> => {
+    const { data, error } = await supabase
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("slug", slug)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? mapProduct(data) : null;
   },
   staleTime: 30_000,
 });

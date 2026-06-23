@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
@@ -10,11 +11,11 @@ import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
   categoriesQuery,
-  brandsQuery,
   type ShowroomProduct,
   type ShowroomCategory,
-  type ShowroomBrand,
 } from "@/lib/showroom-queries";
+import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
+import { getSignedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(featuredProductsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
-    context.queryClient.ensureQueryData(brandsQuery);
+    context.queryClient.ensureQueryData(customWorkQuery);
   },
   pendingMs: 0,
   pendingComponent: HomePending,
@@ -59,7 +60,7 @@ function HomePending() {
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
-  const { data: brands } = useSuspenseQuery(brandsQuery);
+  const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
@@ -67,7 +68,7 @@ function Home() {
       <Featured products={featured} />
       <CategoriesSection categories={categories} />
       <WhyUs />
-      <Brands brands={brands} />
+      <CustomWorkSection projects={customWork} />
       <Testimonials />
       <ContactCta />
     </>
@@ -261,22 +262,50 @@ function WhyUs() {
   );
 }
 
-function Brands({ brands }: { brands: ShowroomBrand[] }) {
+function CustomWorkSection({ projects }: { projects: CustomWork[] }) {
   return (
     <section className="container-luxe pb-24 md:pb-32">
-      <SectionHeader eyebrow="Brands We Carry" title="Names you already trust." />
-      {brands.length === 0 ? (
-        <p className="text-muted-foreground">No brands yet.</p>
+      <div className="flex items-end justify-between gap-6 flex-wrap">
+        <SectionHeader eyebrow="Custom Work" title="Built to your space." sub="Bespoke projects we've delivered for homes, offices, clinics and institutions." />
+        <Link to="/custom-work" className="text-sm font-medium hover:text-walnut gold-underline">See all projects →</Link>
+      </div>
+      {projects.length === 0 ? (
+        <p className="text-muted-foreground">Custom work projects will appear here as the admin adds them.</p>
       ) : (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-          {brands.map((b) => (
-            <div key={b.id} className="rounded-2xl border border-border bg-card px-6 py-8 text-center font-display text-lg hover:border-accent transition-colors">
-              {b.name}
-            </div>
-          ))}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.slice(0, 6).map((p, i) => <CustomWorkTile key={p.id} project={p} index={i} />)}
         </div>
       )}
     </section>
+  );
+}
+
+function CustomWorkTile({ project, index }: { project: CustomWork; index: number }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!project.image) { setSrc(""); return; }
+    getSignedUrl(project.image).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [project.image]);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+    >
+      <Link to="/custom-work" className="group relative block overflow-hidden rounded-3xl border border-border bg-card aspect-[4/3] hover:shadow-[var(--shadow-luxe)] transition-all">
+        {src ? (
+          <img src={src} alt={project.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-5 text-background">
+          <h3 className="font-display text-xl leading-tight">{project.title}</h3>
+          {project.location && <p className="text-xs uppercase tracking-[0.2em] text-background/70 mt-1">{project.location}</p>}
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 

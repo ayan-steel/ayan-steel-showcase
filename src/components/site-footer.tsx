@@ -8,19 +8,14 @@ export function SiteFooter() {
       <div className="container-luxe py-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-background text-foreground font-display text-lg">
-              A
-            </span>
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-background text-foreground font-display text-lg">A</span>
             <div className="leading-tight">
               <div className="font-display text-xl">Ayan Steel</div>
-              <div className="text-[10px] uppercase tracking-[0.25em] text-background/60">
-                Premium Furniture
-              </div>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-background/60">Premium Furniture</div>
             </div>
           </div>
           <p className="mt-5 text-sm text-background/70 leading-relaxed">
-            {CONTACT.tagline}. A trusted name in Katihar for steel and wooden furniture
-            spanning home, office, hospitality and institutional needs.
+            {CONTACT.tagline}. A trusted name in Katihar for steel and wooden furniture spanning home, office, hospitality and institutional needs.
           </p>
         </div>
 
@@ -30,7 +25,7 @@ export function SiteFooter() {
             {[
               ["/products", "Products"],
               ["/categories", "Categories"],
-              ["/brands", "Brands"],
+              ["/custom-work", "Custom Work"],
               ["/gallery", "Gallery"],
               ["/videos", "Videos"],
               ["/about", "About Us"],
@@ -51,7 +46,10 @@ export function SiteFooter() {
             </li>
             <li className="flex gap-2.5">
               <Phone className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
-              <a href={`tel:${CONTACT.phone}`} className="hover:text-accent">{CONTACT.phone}</a>
+              <span>
+                <a href={`tel:${CONTACT.phoneRaw}`} className="block hover:text-accent">{CONTACT.phone}</a>
+                <a href={`tel:${CONTACT.altPhoneRaw}`} className="block hover:text-accent">{CONTACT.altPhone}</a>
+              </span>
             </li>
             <li className="flex gap-2.5">
               <Clock className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
@@ -66,11 +64,7 @@ export function SiteFooter() {
 
         <div>
           <h4 className="font-display text-base mb-4">Connect</h4>
-          <a
-            href={CONTACT.instagramUrl}
-            target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-background/80 hover:text-accent transition-colors"
-          >
+          <a href={CONTACT.instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-background/80 hover:text-accent transition-colors">
             <Instagram className="h-4 w-4" /> @{CONTACT.instagram}
           </a>
           <div className="mt-5 flex flex-wrap gap-2">

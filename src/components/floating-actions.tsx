@@ -22,7 +22,7 @@ export function FloatingActions() {
         <MessageCircle className="h-5 w-5" />
       </a>
       <a
-        href={`tel:${CONTACT.phone}`}
+        href={`tel:${CONTACT.phoneRaw}`}
         aria-label="Call"
         className="grid place-items-center rounded-full bg-foreground text-background shadow-[var(--shadow-luxe)] transition-transform hover:scale-110"
         style={{ height: 52, width: 52 }}

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", subject: "", message: "" });
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,12 +28,13 @@ function ContactPage() {
         name: form.name.trim(),
         email: form.email.trim() || `${form.phone}@phone.local`,
         phone: form.phone.trim() || null,
+        subject: form.subject.trim() || null,
         message: form.message.trim(),
       });
       if (error) throw error;
       setSent(true);
       toast.success("Message sent. We'll be in touch shortly.");
-      setForm({ name: "", phone: "", email: "", message: "" });
+      setForm({ name: "", phone: "", email: "", subject: "", message: "" });
     } catch (err: any) {
       toast.error(err?.message || "Could not send message");
     } finally {
@@ -54,8 +55,8 @@ function ContactPage() {
         <div className="space-y-4">
           <InfoCard icon={MapPin} title="Showroom">{CONTACT.address}</InfoCard>
           <InfoCard icon={Phone} title="Call">
-            <a href={`tel:${CONTACT.phone}`} className="block hover:text-walnut">{CONTACT.phone}</a>
-            <a href={`tel:${CONTACT.altPhone}`} className="block hover:text-walnut">{CONTACT.altPhone}</a>
+            <a href={`tel:${CONTACT.phoneRaw}`} className="block hover:text-walnut">{CONTACT.phone}</a>
+            <a href={`tel:${CONTACT.altPhoneRaw}`} className="block hover:text-walnut">{CONTACT.altPhone}</a>
           </InfoCard>
           <InfoCard icon={MessageCircle} title="WhatsApp">
             <a href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noreferrer" className="hover:text-walnut">
@@ -63,14 +64,10 @@ function ContactPage() {
             </a>
           </InfoCard>
           <InfoCard icon={Instagram} title="Instagram">
-            <a href={CONTACT.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-walnut">
-              @{CONTACT.instagram}
-            </a>
+            <a href={CONTACT.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-walnut">@{CONTACT.instagram}</a>
           </InfoCard>
           <InfoCard icon={Clock} title="Business Hours">
-            {CONTACT.hours.map((h) => (
-              <div key={h.day}>{h.day} · {h.time}</div>
-            ))}
+            {CONTACT.hours.map((h) => (<div key={h.day}>{h.day} · {h.time}</div>))}
           </InfoCard>
         </div>
 
@@ -90,6 +87,7 @@ function ContactPage() {
               <input required type="tel" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={30} className="rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
             </div>
             <input type="email" placeholder="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} className="w-full rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
+            <input placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} maxLength={200} className="w-full rounded-full border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
             <textarea required rows={4} placeholder="What are you looking for?" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} maxLength={2000} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40" />
             <button
               type="submit"

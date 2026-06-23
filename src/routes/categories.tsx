@@ -30,7 +30,7 @@ export const Route = createFileRoute("/categories")({
   component: CategoriesPage,
 });
 
-function CategoryTile({ name, imagePath, index }: { name: string; imagePath: string | null; index: number }) {
+function CategoryTile({ name, slug, imagePath, count, index }: { name: string; slug: string; imagePath: string | null; count: number; index: number }) {
   const [src, setSrc] = useState("");
   useEffect(() => {
     let alive = true;
@@ -47,18 +47,19 @@ function CategoryTile({ name, imagePath, index }: { name: string; imagePath: str
       transition={{ duration: 0.4, delay: index * 0.03 }}
     >
       <Link
-        to="/products"
+        to="/categories/$slug"
+        params={{ slug }}
         className="group relative block overflow-hidden rounded-3xl border border-border bg-card aspect-[5/4] hover:shadow-[var(--shadow-luxe)] transition-all"
       >
         {src ? (
-          <img src={src} alt={name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+          <img src={src} alt={name} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end p-6 text-background">
           <h3 className="font-display text-2xl">{name}</h3>
-          <span className="mt-1 text-xs uppercase tracking-[0.2em] text-background/70">Explore →</span>
+          <span className="mt-1 text-xs uppercase tracking-[0.2em] text-background/70">{count} product{count !== 1 ? "s" : ""} →</span>
         </div>
       </Link>
     </motion.div>
@@ -86,7 +87,8 @@ function CategoriesPage() {
           {categories.map((c, i) => {
             const sample = products.find((p) => p.category === c.name);
             const imagePath = c.image ?? sample?.image ?? null;
-            return <CategoryTile key={c.id} name={c.name} imagePath={imagePath} index={i} />;
+            const count = products.filter((p) => p.category === c.name).length;
+            return <CategoryTile key={c.id} name={c.name} slug={c.slug} imagePath={imagePath} count={count} index={i} />;
           })}
         </div>
       )}
