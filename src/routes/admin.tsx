@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, LogOut, Package, Tag, Award, Image as ImageIcon, MessageSquare, LayoutDashboard, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Package, Tag, Award, Image as ImageIcon, MessageSquare, LayoutDashboard, Loader2, Hammer, Video } from "lucide-react";
 import { uploadFile, deleteFile } from "@/lib/storage";
 import { SignedImage } from "@/components/signed-image";
 
@@ -102,6 +102,8 @@ function AdminPage() {
             <TabsTrigger value="products"><Package className="h-4 w-4" /> Products</TabsTrigger>
             <TabsTrigger value="categories"><Tag className="h-4 w-4" /> Categories</TabsTrigger>
             <TabsTrigger value="brands"><Award className="h-4 w-4" /> Brands</TabsTrigger>
+            <TabsTrigger value="custom_work"><Hammer className="h-4 w-4" /> Custom Work</TabsTrigger>
+            <TabsTrigger value="videos"><Video className="h-4 w-4" /> Videos</TabsTrigger>
             <TabsTrigger value="banners"><ImageIcon className="h-4 w-4" /> Banners</TabsTrigger>
             <TabsTrigger value="messages"><MessageSquare className="h-4 w-4" /> Messages</TabsTrigger>
           </TabsList>
@@ -110,6 +112,8 @@ function AdminPage() {
           <TabsContent value="products" className="mt-6"><ProductsAdmin /></TabsContent>
           <TabsContent value="categories" className="mt-6"><CategoriesAdmin /></TabsContent>
           <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
+          <TabsContent value="custom_work" className="mt-6"><CustomWorkAdmin /></TabsContent>
+          <TabsContent value="videos" className="mt-6"><VideosAdmin /></TabsContent>
           <TabsContent value="banners" className="mt-6"><BannersAdmin /></TabsContent>
           <TabsContent value="messages" className="mt-6"><MessagesAdmin /></TabsContent>
         </Tabs>
@@ -394,6 +398,8 @@ type Product = {
   category_id: string | null; brand_id: string | null;
   images: string[]; specs: Record<string, any>;
   in_stock: boolean; is_featured: boolean; is_active: boolean; display_order: number;
+  length_cm: number | null; breadth_cm: number | null; width_cm: number | null; height_cm: number | null;
+  warranty: string | null; rating: number | null; material: string | null;
 };
 
 function ProductsAdmin() {
@@ -421,9 +427,12 @@ function ProductsAdmin() {
 
   async function save(form: Partial<Product>, files: File[]) {
     try {
+      const existing = form.images || [];
+      const room = Math.max(0, 3 - existing.length);
+      const toUpload = files.slice(0, room);
       const uploaded: string[] = [];
-      for (const f of files) uploaded.push(await uploadFile(f, "products"));
-      const images = [...(form.images || []), ...uploaded];
+      for (const f of toUpload) uploaded.push(await uploadFile(f, "products"));
+      const images = [...existing, ...uploaded].slice(0, 3);
       const payload: any = {
         name: form.name, slug: form.slug || slugify(form.name!),
         description: form.description || null,
@@ -434,6 +443,13 @@ function ProductsAdmin() {
         is_featured: form.is_featured ?? false,
         is_active: form.is_active ?? true,
         display_order: form.display_order ?? 0,
+        length_cm: form.length_cm ?? null,
+        breadth_cm: form.breadth_cm ?? null,
+        width_cm: form.width_cm ?? null,
+        height_cm: form.height_cm ?? null,
+        warranty: form.warranty || null,
+        rating: form.rating ?? null,
+        material: form.material || null,
       };
       if (form.id) {
         const { error } = await supabase.from("products").update(payload).eq("id", form.id);
@@ -445,6 +461,7 @@ function ProductsAdmin() {
       toast.success("Saved");
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["showroom"] });
     } catch (e: any) { toast.error(e.message); }
   }
 
