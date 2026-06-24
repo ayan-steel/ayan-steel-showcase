@@ -15,10 +15,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, LogOut, Package, Tag, Award, Image as ImageIcon, MessageSquare, LayoutDashboard, Loader2, Hammer, Video } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Package, Tag, Award, Image as ImageIcon, MessageSquare, LayoutDashboard, Loader2, Hammer, Video, Wrench } from "lucide-react";
 import { uploadFile, deleteFile } from "@/lib/storage";
 import { SignedImage } from "@/components/signed-image";
-import { CustomWorkAdmin, VideosAdmin } from "@/components/admin-extras";
+import { CustomWorkAdmin, VideosAdmin, RepairServicesAdmin } from "@/components/admin-extras";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -105,6 +105,7 @@ function AdminPage() {
             <TabsTrigger value="brands"><Award className="h-4 w-4" /> Brands</TabsTrigger>
             <TabsTrigger value="custom_work"><Hammer className="h-4 w-4" /> Custom Work</TabsTrigger>
             <TabsTrigger value="videos"><Video className="h-4 w-4" /> Videos</TabsTrigger>
+            <TabsTrigger value="repair_services"><Wrench className="h-4 w-4" /> Repair</TabsTrigger>
             <TabsTrigger value="banners"><ImageIcon className="h-4 w-4" /> Banners</TabsTrigger>
             <TabsTrigger value="messages"><MessageSquare className="h-4 w-4" /> Messages</TabsTrigger>
           </TabsList>
@@ -115,6 +116,7 @@ function AdminPage() {
           <TabsContent value="brands" className="mt-6"><BrandsAdmin /></TabsContent>
           <TabsContent value="custom_work" className="mt-6"><CustomWorkAdmin /></TabsContent>
           <TabsContent value="videos" className="mt-6"><VideosAdmin /></TabsContent>
+          <TabsContent value="repair_services" className="mt-6"><RepairServicesAdmin /></TabsContent>
           <TabsContent value="banners" className="mt-6"><BannersAdmin /></TabsContent>
           <TabsContent value="messages" className="mt-6"><MessagesAdmin /></TabsContent>
         </Tabs>
