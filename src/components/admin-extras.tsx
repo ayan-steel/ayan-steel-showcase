@@ -266,3 +266,127 @@ function VideoDialog({ initial, onClose, onSave }: { initial: Partial<VideoRow>;
     </Dialog>
   );
 }
+
+/* ===================== REPAIR SERVICES ===================== */
+type RepairRow = { id: string; title: string; description: string | null; before_image: string | null; after_image: string | null; display_order: number; is_active: boolean };
+
+export function RepairServicesAdmin() {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["repair_services", "admin"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("repair_services").select("*").order("display_order");
+      if (error) throw error; return data as RepairRow[];
+    },
+  });
+  const [editing, setEditing] = useState<Partial<RepairRow> | null>(null);
+
+  async function save(form: Partial<RepairRow>, beforeFile?: File | null, afterFile?: File | null) {
+    try {
+      let before_image = form.before_image || null;
+      let after_image = form.after_image || null;
+      if (beforeFile) before_image = await uploadFile(beforeFile, "repair_services");
+      if (afterFile) after_image = await uploadFile(afterFile, "repair_services");
+      const payload = {
+        title: form.title!, description: form.description || null,
+        before_image, after_image,
+        display_order: form.display_order ?? 0, is_active: form.is_active ?? true,
+      };
+      if (form.id) {
+        const { error } = await supabase.from("repair_services").update(payload).eq("id", form.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("repair_services").insert(payload);
+        if (error) throw error;
+      }
+      toast.success("Saved");
+      setEditing(null);
+      qc.invalidateQueries({ queryKey: ["repair_services"] });
+      qc.invalidateQueries({ queryKey: ["showroom"] });
+    } catch (e: any) { toast.error(e.message); }
+  }
+
+  async function remove(r: RepairRow) {
+    if (!confirm(`Delete "${r.title}"?`)) return;
+    const { error } = await supabase.from("repair_services").delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    if (r.before_image) await deleteFile(r.before_image);
+    if (r.after_image) await deleteFile(r.after_image);
+    toast.success("Deleted");
+    qc.invalidateQueries({ queryKey: ["repair_services"] });
+    qc.invalidateQueries({ queryKey: ["showroom"] });
+  }
+
+  return (
+    <section>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-display text-xl">Repair Services</h2>
+        <Button onClick={() => setEditing({})}><Plus className="h-4 w-4" /> New Service</Button>
+      </div>
+      {isLoading ? <Loader2 className="animate-spin" /> : (
+        <div className="rounded-lg border border-border bg-card">
+          <Table>
+            <TableHeader><TableRow>
+              <TableHead>Before</TableHead><TableHead>After</TableHead><TableHead>Title</TableHead>
+              <TableHead>Order</TableHead><TableHead>Active</TableHead><TableHead className="text-right">Actions</TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              {(data ?? []).map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell><SignedImage path={r.before_image} className="h-12 w-16 rounded object-cover bg-muted" /></TableCell>
+                  <TableCell><SignedImage path={r.after_image} className="h-12 w-16 rounded object-cover bg-muted" /></TableCell>
+                  <TableCell className="font-medium">{r.title}<div className="text-xs text-muted-foreground truncate max-w-xs">{r.description}</div></TableCell>
+                  <TableCell>{r.display_order}</TableCell>
+                  <TableCell>{r.is_active ? <Badge>Active</Badge> : <Badge variant="secondary">Hidden</Badge>}</TableCell>
+                  <TableCell className="text-right">
+                    <Button size="icon" variant="ghost" onClick={() => setEditing(r)}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => remove(r)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {!data?.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No repair services yet.</TableCell></TableRow>}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {editing && <RepairDialog initial={editing} onClose={() => setEditing(null)} onSave={save} />}
+    </section>
+  );
+}
+
+function RepairDialog({ initial, onClose, onSave }: { initial: Partial<RepairRow>; onClose: () => void; onSave: (f: Partial<RepairRow>, b?: File | null, a?: File | null) => Promise<void> }) {
+  const [form, setForm] = useState<Partial<RepairRow>>(initial);
+  const [beforeFile, setBeforeFile] = useState<File | null>(null);
+  const [afterFile, setAfterFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Repair Service</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Title *</Label><Input value={form.title || ""} placeholder="Air Cooler Repair" onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+          <div><Label>Description</Label><Textarea rows={3} value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Before Image</Label>
+              {form.before_image && <SignedImage path={form.before_image} className="mb-2 h-20 w-full rounded object-cover bg-muted" />}
+              <Input type="file" accept="image/*" onChange={(e) => setBeforeFile(e.target.files?.[0] || null)} />
+            </div>
+            <div><Label>After Image</Label>
+              {form.after_image && <SignedImage path={form.after_image} className="mb-2 h-20 w-full rounded object-cover bg-muted" />}
+              <Input type="file" accept="image/*" onChange={(e) => setAfterFile(e.target.files?.[0] || null)} />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1"><Label>Order</Label><Input type="number" value={form.display_order ?? 0} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })} /></div>
+            <div className="flex items-end gap-2 pb-2"><Switch checked={form.is_active ?? true} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><span className="text-sm">Active</span></div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button disabled={saving || !form.title} onClick={async () => { setSaving(true); await onSave(form, beforeFile, afterFile); setSaving(false); }}>{saving ? "Saving…" : "Save"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
