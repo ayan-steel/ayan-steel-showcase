@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as RepairServicesRouteImport } from './routes/repair-services'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as GalleryRouteImport } from './routes/gallery'
@@ -41,6 +42,11 @@ const VideosRoute = VideosRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RepairServicesRoute = RepairServicesRouteImport.update({
+  id: '/repair-services',
+  path: '/repair-services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
+  '/repair-services': typeof RepairServicesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
+  '/repair-services': typeof RepairServicesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
+  '/repair-services': typeof RepairServicesRoute
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/privacy'
     | '/products'
+    | '/repair-services'
     | '/terms'
     | '/videos'
     | '/wishlist'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/privacy'
     | '/products'
+    | '/repair-services'
     | '/terms'
     | '/videos'
     | '/wishlist'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/privacy'
     | '/products'
+    | '/repair-services'
     | '/terms'
     | '/videos'
     | '/wishlist'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   GalleryRoute: typeof GalleryRoute
   PrivacyRoute: typeof PrivacyRoute
   ProductsRoute: typeof ProductsRouteWithChildren
+  RepairServicesRoute: typeof RepairServicesRoute
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   WishlistRoute: typeof WishlistRoute
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/repair-services': {
+      id: '/repair-services'
+      path: '/repair-services'
+      fullPath: '/repair-services'
+      preLoaderRoute: typeof RepairServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryRoute: GalleryRoute,
   PrivacyRoute: PrivacyRoute,
   ProductsRoute: ProductsRouteWithChildren,
+  RepairServicesRoute: RepairServicesRoute,
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   WishlistRoute: WishlistRoute,
