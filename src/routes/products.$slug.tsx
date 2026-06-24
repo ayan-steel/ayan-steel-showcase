@@ -299,9 +299,18 @@ function Details({ product }: { product: ShowroomProduct }) {
         <Button size="lg" variant="secondary" onClick={() => setQuoteOpen(true)} className="rounded-full sm:col-span-2"><FileText className="h-4 w-4" /> Request a Quote</Button>
       </div>
 
-      <button onClick={() => navigate({ to: "/cart" })} className="mt-5 text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
-        View cart →
-      </button>
+      <p className="mt-5 rounded-2xl border border-dashed border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        Note: Customers can choose their preferred color during their showroom visit, subject to availability.
+      </p>
+
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link to="/products" className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm hover:bg-muted transition">
+          <ChevronLeft className="h-4 w-4" /> Back to Products
+        </Link>
+        <button onClick={() => navigate({ to: "/cart" })} className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline self-center">
+          View cart →
+        </button>
+      </div>
 
       <QuoteDialog open={quoteOpen} onClose={() => setQuoteOpen(false)} product={product} qty={qty} />
     </div>
