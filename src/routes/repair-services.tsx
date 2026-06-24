@@ -74,7 +74,7 @@ function RepairServicesPage() {
           doors, and all welding & steel body work. See real before-and-after results below.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <a href={`https://wa.me/${CONTACT.whatsappRaw}?text=${encodeURIComponent("Hi, I need a repair service.")}`} target="_blank" rel="noreferrer">
+          <a href={`https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent("Hi, I need a repair service.")}`} target="_blank" rel="noreferrer">
             <Button className="rounded-full bg-[#25D366] text-white hover:bg-[#1ebe57]"><MessageCircle className="h-4 w-4" /> WhatsApp Inquiry</Button>
           </a>
           <a href={`tel:${CONTACT.phoneRaw}`}>
