@@ -25,9 +25,11 @@ export const Route = createFileRoute("/products/$slug")({
       { name: "description", content: "Premium furniture from Ayan Steel, Katihar." },
     ],
   }),
-  loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(productBySlugQuery(params.slug));
-    context.queryClient.ensureQueryData(productsQuery);
+  loader: async ({ context, params }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(productBySlugQuery(params.slug)),
+      context.queryClient.ensureQueryData(productsQuery),
+    ]);
   },
   pendingMs: 0,
   pendingComponent: () => (
