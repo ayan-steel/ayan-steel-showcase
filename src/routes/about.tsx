@@ -18,7 +18,7 @@ function AboutPage() {
         <header className="max-w-3xl">
           <span className="text-[11px] uppercase tracking-[0.3em] text-walnut">Our Story</span>
           <h1 className="mt-3 font-display text-5xl md:text-7xl leading-[1.02] text-balance-tight">
-            A showroom built on craft, trust and chai.
+            A showroom built on craft, trust, and quality.
           </h1>
         </header>
 
@@ -36,11 +36,6 @@ function AboutPage() {
               on quality.
             </p>
             <p>
-              Today we stock pieces from India's most-loved brands — Godrej Interio, Featherlite,
-              Durian, HOF and more — alongside our own atelier-grade originals built by master
-              craftsmen.
-            </p>
-            <p>
               Whether you're furnishing a clinic, an office, a school or your dream home, our
               showroom team will help you choose, customise and install — with the kind of service
               you only get when the owner knows your name.
@@ -56,9 +51,9 @@ function AboutPage() {
           >
             {[
               ["19+", "Categories"],
-              ["8+", "Brands"],
               ["1000s", "Happy Customers"],
               ["1 yr", "Workmanship Warranty"],
+              ["100%", "Quality Assured"],
             ].map(([n, l]) => (
               <div key={l} className="rounded-3xl border border-border bg-card p-8">
                 <div className="font-display text-5xl text-walnut">{n}</div>

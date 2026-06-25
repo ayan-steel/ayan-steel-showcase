@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Wrench, Phone, MessageCircle } from "lucide-react";
+import { Wrench, Phone, MessageCircle, ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SignedImage } from "@/components/signed-image";
 import { Button } from "@/components/ui/button";
@@ -88,23 +88,33 @@ function RepairServicesPage() {
       ) : (
         <div className="mt-12 grid gap-10 md:grid-cols-2">
           {data.map((s, i) => (
-            <motion.article
+            <motion.div
               key={s.id}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
-              className="rounded-3xl border border-border bg-card overflow-hidden shadow-[var(--shadow-soft)]"
             >
-              <div className="grid grid-cols-2">
-                <BeforeAfter label="Before" path={s.before_image} />
-                <BeforeAfter label="After" path={s.after_image} accent />
-              </div>
-              <div className="p-5">
-                <h3 className="font-display text-xl">{s.title}</h3>
-                {s.description && <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.description}</p>}
-              </div>
-            </motion.article>
+              <Link
+                to="/repair-services/$id"
+                params={{ id: s.id }}
+                className="group block rounded-3xl border border-border bg-card overflow-hidden shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-luxe)] transition-all duration-500"
+              >
+                <div className="grid grid-cols-2">
+                  <BeforeAfter label="Before" path={s.before_image} />
+                  <BeforeAfter label="After" path={s.after_image} accent />
+                </div>
+                <div className="p-5 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-display text-xl">{s.title}</h3>
+                    {s.description && <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{s.description}</p>}
+                  </div>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground transition group-hover:bg-foreground group-hover:text-background">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       )}
