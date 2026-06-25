@@ -51,8 +51,11 @@ export const Route = createFileRoute("/products/$slug")({
 
 function ProductDetailPage() {
   const { slug } = Route.useParams();
-  const productQuery = useQuery(productBySlugQuery(slug));
   const { data: all = [] } = useQuery(productsQuery);
+  const productQuery = useQuery({
+    ...productBySlugQuery(slug),
+    placeholderData: () => all.find((p) => p.slug === slug || p.id === slug),
+  });
 
   const product = productQuery.data;
 
@@ -157,7 +160,7 @@ function Gallery({ product }: { product: ShowroomProduct }) {
     Promise.all(imgs.map((p) => p ? getSignedUrl(p) : Promise.resolve("")))
       .then((res) => { if (alive) setUrls(res); });
     return () => { alive = false; };
-  }, [product.id]);
+  }, [imgs]);
 
   const current = urls[active] || "";
 
