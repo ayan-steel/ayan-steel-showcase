@@ -26,6 +26,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RepairServicesIdRouteImport } from './routes/repair-services.$id'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 
@@ -114,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepairServicesIdRoute = RepairServicesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => RepairServicesRoute,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -139,12 +145,13 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
-  '/repair-services': typeof RepairServicesRoute
+  '/repair-services': typeof RepairServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/repair-services/$id': typeof RepairServicesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,12 +167,13 @@ export interface FileRoutesByTo {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
-  '/repair-services': typeof RepairServicesRoute
+  '/repair-services': typeof RepairServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/repair-services/$id': typeof RepairServicesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -182,12 +190,13 @@ export interface FileRoutesById {
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRouteWithChildren
-  '/repair-services': typeof RepairServicesRoute
+  '/repair-services': typeof RepairServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/videos': typeof VideosRoute
   '/wishlist': typeof WishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/repair-services/$id': typeof RepairServicesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/categories/$slug'
     | '/products/$slug'
+    | '/repair-services/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/categories/$slug'
     | '/products/$slug'
+    | '/repair-services/$id'
   id:
     | '__root__'
     | '/'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/categories/$slug'
     | '/products/$slug'
+    | '/repair-services/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -269,7 +281,7 @@ export interface RootRouteChildren {
   GalleryRoute: typeof GalleryRoute
   PrivacyRoute: typeof PrivacyRoute
   ProductsRoute: typeof ProductsRouteWithChildren
-  RepairServicesRoute: typeof RepairServicesRoute
+  RepairServicesRoute: typeof RepairServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   VideosRoute: typeof VideosRoute
   WishlistRoute: typeof WishlistRoute
@@ -396,6 +408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repair-services/$id': {
+      id: '/repair-services/$id'
+      path: '/$id'
+      fullPath: '/repair-services/$id'
+      preLoaderRoute: typeof RepairServicesIdRouteImport
+      parentRoute: typeof RepairServicesRoute
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/$slug'
@@ -437,6 +456,18 @@ const ProductsRouteWithChildren = ProductsRoute._addFileChildren(
   ProductsRouteChildren,
 )
 
+interface RepairServicesRouteChildren {
+  RepairServicesIdRoute: typeof RepairServicesIdRoute
+}
+
+const RepairServicesRouteChildren: RepairServicesRouteChildren = {
+  RepairServicesIdRoute: RepairServicesIdRoute,
+}
+
+const RepairServicesRouteWithChildren = RepairServicesRoute._addFileChildren(
+  RepairServicesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -451,7 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryRoute: GalleryRoute,
   PrivacyRoute: PrivacyRoute,
   ProductsRoute: ProductsRouteWithChildren,
-  RepairServicesRoute: RepairServicesRoute,
+  RepairServicesRoute: RepairServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   VideosRoute: VideosRoute,
   WishlistRoute: WishlistRoute,
