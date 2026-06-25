@@ -1,5 +1,5 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, MessageCircle, ShoppingCart, Zap, FileText, Star, ChevronLeft, Heart, Minus, Plus, X, ZoomIn } from "lucide-react";
@@ -25,9 +25,8 @@ export const Route = createFileRoute("/products/$slug")({
       { name: "description", content: "Premium furniture from Ayan Steel, Katihar." },
     ],
   }),
-  loader: async ({ context, params }) => {
-    const product = await context.queryClient.ensureQueryData(productBySlugQuery(params.slug));
-    if (!product) throw notFound();
+  loader: ({ context, params }) => {
+    context.queryClient.prefetchQuery(productBySlugQuery(params.slug));
     context.queryClient.prefetchQuery(productsQuery);
   },
   pendingMs: 0,
@@ -46,21 +45,27 @@ export const Route = createFileRoute("/products/$slug")({
     </section>
   ),
   errorComponent: ({ error }) => <ErrorState title="We couldn't load this product" error={error} />,
-  notFoundComponent: () => <NotFoundState />,
+  notFoundComponent: () => <ProductNotFound />,
   component: ProductDetailPage,
 });
 
 function ProductDetailPage() {
   const { slug } = Route.useParams();
-  const { data: product } = useSuspenseQuery(productBySlugQuery(slug));
+  const productQuery = useQuery(productBySlugQuery(slug));
   const { data: all = [] } = useQuery(productsQuery);
 
-  if (!product) throw notFound();
+  const product = productQuery.data;
 
-  const related = useMemo(
-    () => all.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 6),
-    [all, product],
-  );
+  const related = useMemo(() => {
+    if (!product) return [];
+    const sameCategory = all.filter((p) => p.category === product.category && p.id !== product.id);
+    const fallback = all.filter((p) => p.id !== product.id);
+    return (sameCategory.length > 0 ? sameCategory : fallback).slice(0, 6);
+  }, [all, product]);
+
+  if (productQuery.isLoading) return <ProductDetailSkeleton />;
+  if (productQuery.isError) return <ErrorState title="We couldn't load this product" error={productQuery.error} />;
+  if (!product) return <ProductNotFound />;
 
   return (
     <div className="container-luxe py-8 md:py-12">
@@ -96,6 +101,44 @@ function ProductDetailPage() {
         </section>
       )}
     </div>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <section className="container-luxe py-8 md:py-12">
+      <Skeleton className="h-6 w-40" />
+      <div className="mt-6 grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <Skeleton className="aspect-square rounded-3xl" />
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <Skeleton className="aspect-square rounded-2xl" />
+            <Skeleton className="aspect-square rounded-2xl" />
+            <Skeleton className="aspect-square rounded-2xl" />
+          </div>
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-12 w-4/5" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-10 w-44" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProductNotFound() {
+  return (
+    <NotFoundState message="Product Not Found. We couldn't find this product in the showroom catalogue." />
   );
 }
 
