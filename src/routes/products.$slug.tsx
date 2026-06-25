@@ -1,5 +1,5 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, MessageCircle, ShoppingCart, Zap, FileText, Star, ChevronLeft, Heart, Minus, Plus, X, ZoomIn } from "lucide-react";
@@ -25,11 +25,9 @@ export const Route = createFileRoute("/products/$slug")({
       { name: "description", content: "Premium furniture from Ayan Steel, Katihar." },
     ],
   }),
-  loader: async ({ context, params }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(productBySlugQuery(params.slug)),
-      context.queryClient.ensureQueryData(productsQuery),
-    ]);
+  loader: ({ context, params }) => {
+    context.queryClient.prefetchQuery(productBySlugQuery(params.slug));
+    context.queryClient.prefetchQuery(productsQuery);
   },
   pendingMs: 0,
   pendingComponent: () => (
@@ -47,21 +45,30 @@ export const Route = createFileRoute("/products/$slug")({
     </section>
   ),
   errorComponent: ({ error }) => <ErrorState title="We couldn't load this product" error={error} />,
-  notFoundComponent: () => <NotFoundState />,
+  notFoundComponent: () => <ProductNotFound />,
   component: ProductDetailPage,
 });
 
 function ProductDetailPage() {
   const { slug } = Route.useParams();
-  const { data: product } = useSuspenseQuery(productBySlugQuery(slug));
-  const { data: all } = useSuspenseQuery(productsQuery);
+  const { data: all = [] } = useQuery(productsQuery);
+  const productQuery = useQuery({
+    ...productBySlugQuery(slug),
+    placeholderData: () => all.find((p) => p.slug === slug || p.id === slug),
+  });
 
-  if (!product) throw notFound();
+  const product = productQuery.data;
 
-  const related = useMemo(
-    () => all.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 6),
-    [all, product],
-  );
+  const related = useMemo(() => {
+    if (!product) return [];
+    const sameCategory = all.filter((p) => p.category === product.category && p.id !== product.id);
+    const fallback = all.filter((p) => p.id !== product.id);
+    return (sameCategory.length > 0 ? sameCategory : fallback).slice(0, 6);
+  }, [all, product]);
+
+  if (productQuery.isLoading) return <ProductDetailSkeleton />;
+  if (productQuery.isError) return <ErrorState title="We couldn't load this product" error={productQuery.error} />;
+  if (!product) return <ProductNotFound />;
 
   return (
     <div className="container-luxe py-8 md:py-12">
@@ -100,8 +107,49 @@ function ProductDetailPage() {
   );
 }
 
+function ProductDetailSkeleton() {
+  return (
+    <section className="container-luxe py-8 md:py-12">
+      <Skeleton className="h-6 w-40" />
+      <div className="mt-6 grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <Skeleton className="aspect-square rounded-3xl" />
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <Skeleton className="aspect-square rounded-2xl" />
+            <Skeleton className="aspect-square rounded-2xl" />
+            <Skeleton className="aspect-square rounded-2xl" />
+          </div>
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-12 w-4/5" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-10 w-44" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+            <Skeleton className="h-12 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProductNotFound() {
+  return (
+    <NotFoundState message="Product Not Found. We couldn't find this product in the showroom catalogue." />
+  );
+}
+
 function Gallery({ product }: { product: ShowroomProduct }) {
-  const imgs = (product.images.length > 0 ? product.images : [null]).slice(0, 3);
+  const imgs = useMemo(() => {
+    const paths = product.images.filter(Boolean).slice(0, 3);
+    return Array.from({ length: 3 }, (_, i) => paths[i] ?? null);
+  }, [product.images]);
   const [active, setActive] = useState(0);
   const [urls, setUrls] = useState<string[]>([]);
   const [lightbox, setLightbox] = useState(false);
@@ -112,7 +160,7 @@ function Gallery({ product }: { product: ShowroomProduct }) {
     Promise.all(imgs.map((p) => p ? getSignedUrl(p) : Promise.resolve("")))
       .then((res) => { if (alive) setUrls(res); });
     return () => { alive = false; };
-  }, [product.id]);
+  }, [imgs]);
 
   const current = urls[active] || "";
 
@@ -132,7 +180,7 @@ function Gallery({ product }: { product: ShowroomProduct }) {
             className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 ${zoom ? "scale-150 cursor-zoom-out" : "cursor-zoom-in"}`}
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
+          <ImageFallback label="Large product image" />
         )}
         {current && (
           <button
@@ -144,23 +192,21 @@ function Gallery({ product }: { product: ShowroomProduct }) {
           </button>
         )}
       </motion.div>
-      {imgs.length > 1 && (
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {imgs.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => { setActive(i); setZoom(false); }}
-              className={`relative aspect-square overflow-hidden rounded-2xl border-2 transition ${i === active ? "border-accent" : "border-border hover:border-foreground/40"}`}
-            >
-              {urls[i] ? (
-                <img src={urls[i]} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <div className="absolute inset-0 bg-muted" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        {imgs.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActive(i); setZoom(false); }}
+            className={`relative aspect-square overflow-hidden rounded-2xl border-2 transition ${i === active ? "border-accent" : "border-border hover:border-foreground/40"}`}
+          >
+            {urls[i] ? (
+              <img src={urls[i]} alt={`${product.name} gallery image ${i + 1}`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+            ) : (
+              <ImageFallback label={`Gallery image ${i + 1}`} compact />
+            )}
+          </button>
+        ))}
+      </div>
 
       <AnimatePresence>
         {lightbox && current && (
@@ -186,8 +232,22 @@ function Gallery({ product }: { product: ShowroomProduct }) {
   );
 }
 
+function ImageFallback({ label, compact = false }: { label: string; compact?: boolean }) {
+  return (
+    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-secondary to-muted p-4 text-center">
+      <div>
+        {!compact && <p className="font-display text-2xl text-foreground">{label}</p>}
+        <p className={compact ? "text-[10px] leading-snug text-muted-foreground" : "mt-2 text-sm text-muted-foreground"}>
+          Information will be updated soon
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Details({ product }: { product: ShowroomProduct }) {
   const price = product.salePrice ?? product.price ?? 0;
+  const hasPrice = price > 0;
   const [qty, setQty] = useState(1);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const navigate = useNavigate();
@@ -205,16 +265,18 @@ function Details({ product }: { product: ShowroomProduct }) {
     window.open(url, "_blank");
   }
 
-  const dims = [
-    ["Length", product.length_cm], ["Breadth", product.breadth_cm],
-    ["Width", product.width_cm], ["Height", product.height_cm],
-  ].filter(([, v]) => v != null);
+  const dimensionRows = [
+    ["Length", product.length_cm],
+    ["Width", product.width_cm ?? product.breadth_cm],
+    ["Height", product.height_cm],
+  ] as const;
+  const pendingText = "Information will be updated soon";
 
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
         <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-          {product.category} {product.brand && `· ${product.brand}`}
+          {product.category || "Product"} {product.brand && `· ${product.brand}`}
         </span>
         <button
           onClick={() => toggleWish(product.id)}
@@ -236,41 +298,35 @@ function Details({ product }: { product: ShowroomProduct }) {
         <span className="text-sm text-muted-foreground">{rating.toFixed(1)} / 5</span>
       </div>
 
-      {price > 0 && (
-        <div className="mt-5 flex items-baseline gap-3">
-          <span className="font-display text-4xl">₹{price.toLocaleString("en-IN")}</span>
-          {product.salePrice && product.price && (
-            <span className="text-lg text-muted-foreground line-through">₹{product.price.toLocaleString("en-IN")}</span>
-          )}
+      <div className="mt-5 flex items-baseline gap-3">
+        <span className="font-display text-4xl">
+          {hasPrice ? `₹${price.toLocaleString("en-IN")}` : pendingText}
+        </span>
+        {product.salePrice && product.price && (
+          <span className="text-lg text-muted-foreground line-through">₹{product.price.toLocaleString("en-IN")}</span>
+        )}
+      </div>
+
+      <p className="mt-5 text-muted-foreground leading-relaxed">
+        {product.description?.trim() || pendingText}
+      </p>
+
+      <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-3 text-sm rounded-2xl border border-border bg-card p-5 sm:grid-cols-2">
+        {dimensionRows.map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">{k}</dt>
+            <dd className="font-medium text-right">{v != null ? `${v} cm` : pendingText}</dd>
+          </div>
+        ))}
+        <div className="flex justify-between gap-4 sm:col-span-2 pt-2 border-t border-border">
+          <dt className="text-muted-foreground">Warranty</dt>
+          <dd className="font-medium text-right">{product.warranty?.trim() || "5 Years"}</dd>
         </div>
-      )}
-
-      {product.description && (
-        <p className="mt-5 text-muted-foreground leading-relaxed">{product.description}</p>
-      )}
-
-      {(dims.length > 0 || product.warranty || product.material) && (
-        <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm rounded-2xl border border-border bg-card p-5">
-          {dims.map(([k, v]) => (
-            <div key={k as string} className="flex justify-between">
-              <dt className="text-muted-foreground">{k}</dt>
-              <dd className="font-medium">{v} cm</dd>
-            </div>
-          ))}
-          {product.warranty && (
-            <div className="flex justify-between col-span-2 pt-2 border-t border-border">
-              <dt className="text-muted-foreground">Warranty</dt>
-              <dd className="font-medium">{product.warranty}</dd>
-            </div>
-          )}
-          {product.material && (
-            <div className="flex justify-between col-span-2">
-              <dt className="text-muted-foreground">Material</dt>
-              <dd className="font-medium">{product.material}</dd>
-            </div>
-          )}
-        </dl>
-      )}
+        <div className="flex justify-between gap-4 sm:col-span-2">
+          <dt className="text-muted-foreground">Material</dt>
+          <dd className="font-medium text-right">{product.material?.trim() || pendingText}</dd>
+        </div>
+      </dl>
 
       {/* Qty */}
       <div className="mt-6 flex items-center gap-4">

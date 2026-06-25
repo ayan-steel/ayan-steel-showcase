@@ -111,12 +111,15 @@ export const featuredProductsQuery = queryOptions({
 export const productBySlugQuery = (slug: string) => queryOptions({
   queryKey: ["showroom", "product", slug],
   queryFn: async (): Promise<ShowroomProduct | null> => {
-    const { data, error } = await supabase
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slug);
+    let query = supabase
       .from("products")
       .select(PRODUCT_SELECT)
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .maybeSingle();
+      .eq("is_active", true);
+
+    query = isUuid ? query.eq("id", slug) : query.eq("slug", slug);
+
+    const { data, error } = await query.maybeSingle();
     if (error) throw error;
     return data ? mapProduct(data) : null;
   },
