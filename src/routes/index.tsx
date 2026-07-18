@@ -32,9 +32,11 @@ export const Route = createFileRoute("/")({
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(featuredProductsQuery);
+    context.queryClient.ensureQueryData(productsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(customWorkQuery);
   },
+
   pendingMs: 0,
   pendingComponent: HomePending,
   errorComponent: ({ error }) => <ErrorState title="We couldn't load the showroom" error={error} />,
