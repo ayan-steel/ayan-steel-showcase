@@ -64,11 +64,13 @@ function HomePending() {
 
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
+  const { data: allProducts } = useSuspenseQuery(productsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
+      <FeaturedCarousel products={allProducts} />
       <Marquee />
       <Featured products={featured} />
       <CategoriesSection categories={categories} />
@@ -79,6 +81,7 @@ function Home() {
     </>
   );
 }
+
 
 function Hero() {
   return (
