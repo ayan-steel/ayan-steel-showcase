@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getSignedUrl } from "@/lib/storage";
 import type { ShowroomProduct } from "@/lib/showroom-queries";
 
-const AUTO_MS = 4000;
+const AUTO_MS = 3000;
 
 function Slide({ product }: { product: ShowroomProduct }) {
   const [src, setSrc] = useState("");
