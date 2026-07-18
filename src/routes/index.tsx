@@ -10,12 +10,15 @@ import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
+  productsQuery,
   categoriesQuery,
   type ShowroomProduct,
   type ShowroomCategory,
 } from "@/lib/showroom-queries";
 import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
 import { getSignedUrl } from "@/lib/storage";
+import { FeaturedCarousel } from "@/components/featured-carousel";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
