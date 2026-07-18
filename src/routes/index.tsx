@@ -10,12 +10,15 @@ import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
+  productsQuery,
   categoriesQuery,
   type ShowroomProduct,
   type ShowroomCategory,
 } from "@/lib/showroom-queries";
 import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
 import { getSignedUrl } from "@/lib/storage";
+import { FeaturedCarousel } from "@/components/featured-carousel";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,9 +32,11 @@ export const Route = createFileRoute("/")({
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(featuredProductsQuery);
+    context.queryClient.ensureQueryData(productsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(customWorkQuery);
   },
+
   pendingMs: 0,
   pendingComponent: HomePending,
   errorComponent: ({ error }) => <ErrorState title="We couldn't load the showroom" error={error} />,
@@ -59,11 +64,13 @@ function HomePending() {
 
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
+  const { data: allProducts } = useSuspenseQuery(productsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
+      <FeaturedCarousel products={allProducts} />
       <Marquee />
       <Featured products={featured} />
       <CategoriesSection categories={categories} />
@@ -74,6 +81,7 @@ function Home() {
     </>
   );
 }
+
 
 function Hero() {
   return (
