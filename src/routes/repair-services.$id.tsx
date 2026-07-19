@@ -81,9 +81,11 @@ function RepairDetail() {
       </motion.header>
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <BeforeAfter label="Before" path={service.before_image} />
-        <BeforeAfter label="After" path={service.after_image} accent />
+        <BeforeAfter label="Before" path={service.before_image} onZoom={setZoomSrc} />
+        <BeforeAfter label="After" path={service.after_image} accent onZoom={setZoomSrc} />
       </div>
+
+      <ImageLightbox src={zoomSrc} alt={service.title} onClose={() => setZoomSrc(null)} />
 
       {service.description && (
         <div className="mt-10 max-w-3xl">
