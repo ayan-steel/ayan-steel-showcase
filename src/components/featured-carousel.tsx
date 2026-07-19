@@ -18,7 +18,7 @@ function Card({ product, eager }: { product: ShowroomProduct; eager?: boolean })
       to="/products/$slug"
       params={{ slug: product.slug }}
       aria-label={`View ${product.name}`}
-      className="group relative block shrink-0 overflow-hidden rounded-2xl border border-border bg-secondary/40 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[200px] md:h-[200px] mx-2"
+      className="group relative block shrink-0 overflow-hidden rounded-2xl border border-border bg-secondary/40 w-[120px] h-[120px] sm:w-[160px] sm:h-[160px] md:w-[190px] md:h-[190px] mx-1.5 sm:mx-2"
     >
       {!loaded && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-secondary to-muted" />
@@ -27,8 +27,8 @@ function Card({ product, eager }: { product: ShowroomProduct; eager?: boolean })
         <img
           src={src}
           alt={product.name}
-          width={200}
-          height={200}
+          width={190}
+          height={190}
           loading={eager ? "eager" : "lazy"}
           decoding="async"
           fetchPriority={eager ? "high" : "auto"}
@@ -43,11 +43,11 @@ function Card({ product, eager }: { product: ShowroomProduct; eager?: boolean })
 function Marquee({ items, reverse, eagerCount = 0 }: { items: ShowroomProduct[]; reverse?: boolean; eagerCount?: number }) {
   const loop = [...items, ...items];
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative w-full overflow-hidden">
       <div
         className="flex w-max py-2 hover:[animation-play-state:paused]"
         style={{
-          animation: `${reverse ? "marquee-rtl-reverse" : "marquee-rtl"} 55s linear infinite`,
+          animation: `${reverse ? "marquee-rtl-reverse" : "marquee-rtl"} 70s linear infinite`,
           willChange: "transform",
         }}
       >
@@ -65,7 +65,7 @@ export function FeaturedCarousel({ products }: { products: ShowroomProduct[] }) 
   const base = items.length < 6 ? [...items, ...items, ...items] : items;
 
   return (
-    <section className="container-luxe py-10 md:py-16 space-y-4">
+    <section className="w-full overflow-hidden py-10 md:py-16 space-y-4">
       <Marquee items={base} eagerCount={6} />
       <Marquee items={[...base].reverse()} reverse />
       <style>{`
