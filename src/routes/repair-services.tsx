@@ -125,7 +125,7 @@ function RepairServicesPage() {
 function BeforeAfter({ label, path, accent }: { label: string; path: string | null; accent?: boolean }) {
   return (
     <div className="relative aspect-[4/3] bg-secondary flex items-center justify-center p-4 sm:p-6">
-      <SignedImage path={path} className="max-h-[80%] max-w-[80%] object-contain" alt={label} />
+      <SignedImage path={path} className="max-h-[88%] max-w-[88%] object-contain p-2 sm:p-3" alt={label} />
       <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] ${accent ? "bg-accent text-accent-foreground" : "bg-foreground/85 text-background"}`}>
         {label}
       </span>

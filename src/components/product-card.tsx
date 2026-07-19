@@ -41,7 +41,7 @@ export function ProductCard({ product, index = 0 }: { product: ShowroomProduct; 
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="max-h-[75%] max-w-[75%] object-contain transition-transform duration-[1200ms] group-hover:scale-105"
+              className="max-h-[88%] max-w-[88%] object-contain transition-transform duration-[1200ms] group-hover:scale-105 p-2 sm:p-3"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
