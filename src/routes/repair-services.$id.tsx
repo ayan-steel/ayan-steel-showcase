@@ -113,13 +113,32 @@ function RepairDetail() {
   );
 }
 
-function BeforeAfter({ label, path, accent }: { label: string; path: string | null; accent?: boolean }) {
+function BeforeAfter({ label, path, accent, onZoom }: { label: string; path: string | null; accent?: boolean; onZoom: (src: string) => void }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!path) { setSrc(""); return; }
+    getSignedUrl(path).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [path]);
+
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-secondary border border-border flex items-center justify-center p-6 sm:p-8">
-      <SignedImage path={path} className="max-h-[88%] max-w-[88%] object-contain p-2 sm:p-3" alt={label} />
+    <button
+      type="button"
+      onClick={() => src && onZoom(src)}
+      className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-secondary border border-border flex items-center justify-center p-2 sm:p-3 cursor-zoom-in"
+    >
+      {src ? (
+        <img src={src} alt={label} className="h-[94%] w-[94%] object-contain transition-transform duration-500 group-hover:scale-105" />
+      ) : (
+        <div className="h-[94%] w-[94%] animate-pulse bg-muted rounded-2xl" />
+      )}
       <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] ${accent ? "bg-accent text-accent-foreground" : "bg-foreground/85 text-background"}`}>
         {label}
       </span>
-    </div>
+      <span className="absolute right-3 bottom-3 grid h-9 w-9 place-items-center rounded-full bg-background/95 text-foreground opacity-0 group-hover:opacity-100 transition">
+        <ZoomIn className="h-4 w-4" />
+      </span>
+    </button>
   );
 }
