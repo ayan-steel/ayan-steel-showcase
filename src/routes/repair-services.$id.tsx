@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronLeft, Phone, MessageCircle, Wrench } from "lucide-react";
+import { ChevronLeft, Phone, MessageCircle, Wrench, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { SignedImage } from "@/components/signed-image";
+import { getSignedUrl } from "@/lib/storage";
+import { ImageLightbox } from "@/components/image-lightbox";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState, NotFoundState } from "@/components/error-state";
@@ -54,6 +56,7 @@ export const Route = createFileRoute("/repair-services/$id")({
 function RepairDetail() {
   const { id } = Route.useParams();
   const { data: service } = useSuspenseQuery(repairServiceQuery(id));
+  const [zoomSrc, setZoomSrc] = useState<string | null>(null);
   if (!service) throw notFound();
 
   const waText = encodeURIComponent(`Hi, I'm interested in your "${service.title}" repair service.`);
@@ -78,9 +81,11 @@ function RepairDetail() {
       </motion.header>
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <BeforeAfter label="Before" path={service.before_image} />
-        <BeforeAfter label="After" path={service.after_image} accent />
+        <BeforeAfter label="Before" path={service.before_image} onZoom={setZoomSrc} />
+        <BeforeAfter label="After" path={service.after_image} accent onZoom={setZoomSrc} />
       </div>
+
+      <ImageLightbox src={zoomSrc} alt={service.title} onClose={() => setZoomSrc(null)} />
 
       {service.description && (
         <div className="mt-10 max-w-3xl">
@@ -108,13 +113,32 @@ function RepairDetail() {
   );
 }
 
-function BeforeAfter({ label, path, accent }: { label: string; path: string | null; accent?: boolean }) {
+function BeforeAfter({ label, path, accent, onZoom }: { label: string; path: string | null; accent?: boolean; onZoom: (src: string) => void }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!path) { setSrc(""); return; }
+    getSignedUrl(path).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [path]);
+
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-secondary border border-border flex items-center justify-center p-6 sm:p-8">
-      <SignedImage path={path} className="max-h-[88%] max-w-[88%] object-contain p-2 sm:p-3" alt={label} />
+    <button
+      type="button"
+      onClick={() => src && onZoom(src)}
+      className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-secondary border border-border flex items-center justify-center p-2 sm:p-3 cursor-zoom-in"
+    >
+      {src ? (
+        <img src={src} alt={label} className="h-[94%] w-[94%] object-contain transition-transform duration-500 group-hover:scale-105" />
+      ) : (
+        <div className="h-[94%] w-[94%] animate-pulse bg-muted rounded-2xl" />
+      )}
       <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] ${accent ? "bg-accent text-accent-foreground" : "bg-foreground/85 text-background"}`}>
         {label}
       </span>
-    </div>
+      <span className="absolute right-3 bottom-3 grid h-9 w-9 place-items-center rounded-full bg-background/95 text-foreground opacity-0 group-hover:opacity-100 transition">
+        <ZoomIn className="h-4 w-4" />
+      </span>
+    </button>
   );
 }

@@ -34,14 +34,14 @@ export function ProductCard({ product, index = 0 }: { product: ShowroomProduct; 
         className="block"
         aria-label={`View ${product.name}`}
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-secondary flex items-center justify-center p-6 sm:p-8">
+        <div className="relative aspect-[4/5] overflow-hidden bg-secondary flex items-center justify-center p-2 sm:p-3">
           {src ? (
             <img
               src={src}
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="max-h-[88%] max-w-[88%] object-contain transition-transform duration-[1200ms] group-hover:scale-105 p-2 sm:p-3"
+              className="h-[94%] w-[94%] object-contain transition-transform duration-[1200ms] group-hover:scale-105"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
