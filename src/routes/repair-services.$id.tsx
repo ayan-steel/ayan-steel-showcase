@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronLeft, Phone, MessageCircle, Wrench } from "lucide-react";
+import { ChevronLeft, Phone, MessageCircle, Wrench, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { SignedImage } from "@/components/signed-image";
+import { getSignedUrl } from "@/lib/storage";
+import { ImageLightbox } from "@/components/image-lightbox";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState, NotFoundState } from "@/components/error-state";
