@@ -56,6 +56,7 @@ export const Route = createFileRoute("/repair-services/$id")({
 function RepairDetail() {
   const { id } = Route.useParams();
   const { data: service } = useSuspenseQuery(repairServiceQuery(id));
+  const [zoomSrc, setZoomSrc] = useState<string | null>(null);
   if (!service) throw notFound();
 
   const waText = encodeURIComponent(`Hi, I'm interested in your "${service.title}" repair service.`);
