@@ -178,3 +178,26 @@ export const bannersQuery = queryOptions({
   },
   staleTime: 60_000,
 });
+
+/** Slim, capped query for the homepage image marquee — only the fields the cards need. */
+export type CarouselProduct = { id: string; slug: string; name: string; image: string | null };
+
+export const carouselProductsQuery = queryOptions({
+  queryKey: ["showroom", "products", "carousel"],
+  queryFn: async (): Promise<CarouselProduct[]> => {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, slug, name, images")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .limit(24);
+    if (error) throw error;
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      image: Array.isArray(r.images) ? (r.images[0] ?? null) : null,
+    }));
+  },
+  staleTime: 5 * 60_000,
+});

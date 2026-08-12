@@ -10,7 +10,7 @@ import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
-  productsQuery,
+  carouselProductsQuery,
   categoriesQuery,
   type ShowroomProduct,
   type ShowroomCategory,
@@ -18,6 +18,8 @@ import {
 import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
 import { getSignedUrl } from "@/lib/storage";
 import { FeaturedCarousel } from "@/components/featured-carousel";
+import { BannerSection } from "@/components/banner-section";
+
 
 
 export const Route = createFileRoute("/")({
@@ -32,10 +34,11 @@ export const Route = createFileRoute("/")({
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(featuredProductsQuery);
-    context.queryClient.ensureQueryData(productsQuery);
+    context.queryClient.ensureQueryData(carouselProductsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(customWorkQuery);
   },
+
 
   pendingMs: 0,
   pendingComponent: HomePending,
@@ -64,13 +67,15 @@ function HomePending() {
 
 function Home() {
   const { data: featured } = useSuspenseQuery(featuredProductsQuery);
-  const { data: allProducts } = useSuspenseQuery(productsQuery);
+  const { data: carouselProducts } = useSuspenseQuery(carouselProductsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
-      <FeaturedCarousel products={allProducts} />
+      <BannerSection />
+      <FeaturedCarousel products={carouselProducts} />
+
       <Marquee />
       <Featured products={featured} />
       <CategoriesSection categories={categories} />
