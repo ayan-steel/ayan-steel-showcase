@@ -10,7 +10,7 @@ import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
   featuredProductsQuery,
-  productsQuery,
+  carouselProductsQuery,
   categoriesQuery,
   type ShowroomProduct,
   type ShowroomCategory,
@@ -18,6 +18,8 @@ import {
 import { customWorkQuery, type CustomWork } from "@/lib/queries-extra";
 import { getSignedUrl } from "@/lib/storage";
 import { FeaturedCarousel } from "@/components/featured-carousel";
+import { BannerSection } from "@/components/banner-section";
+
 
 
 export const Route = createFileRoute("/")({
