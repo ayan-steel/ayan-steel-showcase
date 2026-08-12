@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
@@ -18,7 +18,8 @@ function BannerFrame({ children }: { children: React.ReactNode }) {
 }
 
 export function BannerSection() {
-  const { data: banners = [], isLoading } = useQuery(bannersQuery);
+  const { data, isLoading } = useQuery(bannersQuery);
+  const banners = useMemo(() => data ?? [], [data]);
   const [urls, setUrls] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
 
@@ -71,7 +72,6 @@ export function BannerSection() {
           transition={{ duration: 0.6 }}
           loading="eager"
           decoding="async"
-          fetchPriority="high"
           className="absolute inset-0 h-full w-full object-cover"
         />
       </AnimatePresence>
