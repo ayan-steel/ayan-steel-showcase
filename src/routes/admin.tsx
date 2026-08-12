@@ -647,8 +647,18 @@ function BannersAdmin() {
   async function save(form: Partial<Banner>, file?: File | null) {
     try {
       let image_url = form.image_url || "";
-      if (file) image_url = await uploadFile(file, "banners");
-      if (!image_url) { toast.error("Image required"); return; }
+      if (file) {
+        const t = toast.loading("Uploading banner image…");
+        try {
+          image_url = await uploadFile(file, "banners");
+          toast.dismiss(t);
+        } catch (err: any) {
+          toast.dismiss(t);
+          toast.error(err?.message || "Image upload failed");
+          return;
+        }
+      }
+      if (!image_url) { toast.error("Please choose a banner image before saving"); return; }
       const payload = {
         title: form.title!, subtitle: form.subtitle || null,
         image_url, link_url: form.link_url || null,
@@ -664,6 +674,7 @@ function BannersAdmin() {
       toast.success("Saved");
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["banners"] });
+      qc.invalidateQueries({ queryKey: ["showroom", "banners"] });
     } catch (e: any) { toast.error(e.message); }
   }
 
@@ -674,6 +685,7 @@ function BannersAdmin() {
     if (b.image_url) await deleteFile(b.image_url);
     toast.success("Deleted");
     qc.invalidateQueries({ queryKey: ["banners"] });
+      qc.invalidateQueries({ queryKey: ["showroom", "banners"] });
   }
 
   return (
@@ -736,7 +748,7 @@ function BannerDialog({ initial, onClose, onSave }: { initial: Partial<Banner>; 
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button disabled={saving || !form.title} onClick={async () => { setSaving(true); await onSave(form, file); setSaving(false); }}>{saving ? "Saving…" : "Save"}</Button>
+          <Button disabled={saving || !form.title || (!form.id && !file)} onClick={async () => { setSaving(true); await onSave(form, file); setSaving(false); }}>{saving ? "Saving…" : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
