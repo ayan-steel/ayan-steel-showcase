@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { getSignedUrl } from "@/lib/storage";
-import type { ShowroomProduct } from "@/lib/showroom-queries";
+import type { CarouselProduct } from "@/lib/showroom-queries";
 
-function Card({ product, eager }: { product: ShowroomProduct; eager?: boolean }) {
+function Card({ product, eager }: { product: CarouselProduct; eager?: boolean }) {
   const [src, setSrc] = useState("");
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -40,7 +40,7 @@ function Card({ product, eager }: { product: ShowroomProduct; eager?: boolean })
   );
 }
 
-function Marquee({ items, reverse, eagerCount = 0 }: { items: ShowroomProduct[]; reverse?: boolean; eagerCount?: number }) {
+function Marquee({ items, reverse, eagerCount = 0 }: { items: CarouselProduct[]; reverse?: boolean; eagerCount?: number }) {
   const loop = [...items, ...items];
   return (
     <div className="relative w-full overflow-hidden">
@@ -59,7 +59,7 @@ function Marquee({ items, reverse, eagerCount = 0 }: { items: ShowroomProduct[];
   );
 }
 
-export function FeaturedCarousel({ products }: { products: ShowroomProduct[] }) {
+export function FeaturedCarousel({ products }: { products: CarouselProduct[] }) {
   const items = products.filter((p) => p.image);
   if (items.length === 0) return null;
   const base = items.length < 6 ? [...items, ...items, ...items] : items;
