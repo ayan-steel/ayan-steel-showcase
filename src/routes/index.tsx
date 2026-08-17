@@ -128,7 +128,7 @@ function Hero() {
             </Link>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/5 backdrop-blur px-6 py-3.5 text-sm font-medium text-background transition-all hover:bg-background/15"
+              className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-6 py-3.5 text-sm font-medium transition-all"
             >
               <MapPin className="h-4 w-4" /> Visit Showroom
             </Link>
