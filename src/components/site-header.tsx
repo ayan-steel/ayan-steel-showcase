@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, ShoppingBag, Heart } from "lucide-react";
 import { useCart, useWishlist } from "@/lib/cart-store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -58,6 +59,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link to="/wishlist" aria-label="Wishlist" className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-foreground/5 transition">
             <Heart className="h-5 w-5" />
             {wishCount > 0 && (
