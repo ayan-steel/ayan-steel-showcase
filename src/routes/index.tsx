@@ -115,7 +115,7 @@ function Hero() {
           <h1 className="mt-6 font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] text-balance-tight">
             Furniture that <em className="not-italic text-accent">defines</em> your space.
           </h1>
-          <p className="mt-6 max-w-xl text-base md:text-lg text-background/80 leading-relaxed">
+          <p className="hero-dim mt-6 max-w-xl text-base md:text-lg leading-relaxed">
             Steel almirahs, executive seating, dining sets, sofas and custom-built pieces —
             curated from India's most trusted brands and our own atelier.
           </p>
