@@ -242,3 +242,35 @@
     transform-origin: left;
   }
 }
+
+/* Hero: theme-independent so the showroom photo never shifts color between themes */
+@utility hero-scrim {
+  background-image: linear-gradient(
+    to bottom,
+    oklch(0.16 0.01 60 / 0.3) 0%,
+    oklch(0.16 0.01 60 / 0.4) 50%,
+    oklch(0.16 0.01 60 / 0.7) 100%
+  );
+}
+
+@utility hero-ink {
+  color: oklch(0.99 0 0);
+  & .hero-dim { color: oklch(0.99 0 0 / 0.8); }
+  & .hero-dimmer { color: oklch(0.99 0 0 / 0.6); }
+  & .hero-chip {
+    border-color: oklch(0.99 0 0 / 0.3);
+    background-color: oklch(0.99 0 0 / 0.1);
+  }
+  & .hero-chip:hover { background-color: oklch(0.99 0 0 / 0.15); }
+  & .hero-btn {
+    background-color: oklch(0.99 0 0);
+    color: oklch(0.16 0.01 60);
+  }
+}
+
+/* never tint or filter the hero photo in any theme */
+.hero-media {
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
