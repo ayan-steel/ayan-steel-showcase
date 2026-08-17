@@ -107,7 +107,7 @@ const themeInit = `(function(){try{var t=localStorage.getItem('ayan-theme');var 
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
