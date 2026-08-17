@@ -22,6 +22,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { FloatingActions } from "@/components/floating-actions";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/lib/theme";
 import { useRouterState } from "@tanstack/react-router";
 
 function NotFoundComponent() {
@@ -102,10 +103,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const themeInit = `(function(){try{var t=localStorage.getItem('ayan-theme');var r=document.documentElement;r.classList.remove('dark','bold');if(t==='dark')r.classList.add('dark');if(t==='bold'){r.classList.add('dark');r.classList.add('bold');}}catch(e){}})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head><HeadContent /></head>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body>
         {children}
         <Scripts />
@@ -120,13 +126,16 @@ function RootComponent() {
   const chrome = !pathname.startsWith("/admin") && !pathname.startsWith("/auth");
   return (
     <QueryClientProvider client={queryClient}>
-      {chrome && <SiteHeader />}
-      <main className={chrome ? "min-h-screen pt-20" : "min-h-screen"}>
-        <Outlet />
-      </main>
-      {chrome && <SiteFooter />}
-      {chrome && <FloatingActions />}
-      <Toaster richColors position="top-right" />
+      <ThemeProvider>
+        {chrome && <SiteHeader />}
+        <main className={chrome ? "min-h-screen pt-20" : "min-h-screen"}>
+          <Outlet />
+        </main>
+        {chrome && <SiteFooter />}
+        {chrome && <FloatingActions />}
+        <Toaster richColors position="top-right" />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
