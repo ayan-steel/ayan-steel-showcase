@@ -151,6 +151,32 @@
     border-color: var(--color-border);
   }
 
+  /* smooth theme switching */
+  body,
+  header,
+  footer,
+  main,
+  section,
+  aside,
+  nav,
+  article,
+  div,
+  input,
+  textarea,
+  select,
+  button,
+  a,
+  span,
+  p,
+  h1, h2, h3, h4, h5, h6 {
+    transition: background-color 320ms ease, border-color 320ms ease, color 320ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; }
+  }
+
+
   html {
     scroll-behavior: smooth;
   }
