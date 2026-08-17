@@ -108,7 +108,7 @@ function Hero() {
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-3xl"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.25em]">
+          <span className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.25em]">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             Est. Katihar · Premium Showroom
           </span>
