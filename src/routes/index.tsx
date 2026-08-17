@@ -97,38 +97,38 @@ function Hero() {
         width={1920}
         height={1080}
         fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="hero-media absolute inset-0 h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/40 to-foreground/70" />
+      <div className="hero-scrim absolute inset-0" />
 
-      <div className="container-luxe relative flex min-h-[100svh] flex-col justify-end pb-24 pt-32 text-background">
+      <div className="hero-ink container-luxe relative flex min-h-[100svh] flex-col justify-end pb-24 pt-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-3xl"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.25em]">
+          <span className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-4 py-1.5 text-xs uppercase tracking-[0.25em]">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             Est. Katihar · Premium Showroom
           </span>
           <h1 className="mt-6 font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] text-balance-tight">
             Furniture that <em className="not-italic text-accent">defines</em> your space.
           </h1>
-          <p className="mt-6 max-w-xl text-base md:text-lg text-background/80 leading-relaxed">
+          <p className="hero-dim mt-6 max-w-xl text-base md:text-lg leading-relaxed">
             Steel almirahs, executive seating, dining sets, sofas and custom-built pieces —
             curated from India's most trusted brands and our own atelier.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 rounded-full bg-background px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
+              className="hero-btn inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-medium transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
             >
               Explore Collection <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/5 backdrop-blur px-6 py-3.5 text-sm font-medium text-background transition-all hover:bg-background/15"
+              className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-6 py-3.5 text-sm font-medium transition-all"
             >
               <MapPin className="h-4 w-4" /> Visit Showroom
             </Link>
@@ -138,7 +138,7 @@ function Hero() {
 
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-background/60"
+        className="hero-ink hero-dimmer absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em]"
       >
         Scroll
       </motion.div>
