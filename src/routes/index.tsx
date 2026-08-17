@@ -97,11 +97,11 @@ function Hero() {
         width={1920}
         height={1080}
         fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="hero-media absolute inset-0 h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/40 to-foreground/70" />
+      <div className="hero-scrim absolute inset-0" />
 
-      <div className="container-luxe relative flex min-h-[100svh] flex-col justify-end pb-24 pt-32 text-background">
+      <div className="hero-ink container-luxe relative flex min-h-[100svh] flex-col justify-end pb-24 pt-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
