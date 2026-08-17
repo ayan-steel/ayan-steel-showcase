@@ -274,3 +274,5 @@
   mix-blend-mode: normal !important;
   opacity: 1 !important;
 }
+
+@utility hero-dimmer { color: oklch(0.99 0 0 / 0.6); }
