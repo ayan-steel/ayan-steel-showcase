@@ -122,7 +122,7 @@ function Hero() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 rounded-full bg-background px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
+              className="hero-btn inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-medium transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
             >
               Explore Collection <ArrowRight className="h-4 w-4" />
             </Link>
