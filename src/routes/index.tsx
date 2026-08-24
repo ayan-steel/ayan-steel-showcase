@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin } from "lucide-react";
+import { ArrowRight, Sparkles, Truck, ShieldCheck, Wrench, Star, MapPin, BadgeIndianRupee, Store } from "lucide-react";
 import heroImage from "@/assets/hero-showroom.jpg";
 import { ErrorState, NotFoundState } from "@/components/error-state";
 import { HeroSkeleton, ProductGridSkeleton, ChipGridSkeleton, PageHeaderSkeleton } from "@/components/skeletons";
 import { TESTIMONIALS, CONTACT } from "@/data/showroom";
 import { ProductCard } from "@/components/product-card";
 import {
-  featuredProductsQuery,
+  homeProductsQuery,
   carouselProductsQuery,
   categoriesQuery,
   type ShowroomProduct,
@@ -20,8 +20,6 @@ import { getSignedUrl } from "@/lib/storage";
 import { FeaturedCarousel } from "@/components/featured-carousel";
 import { BannerSection } from "@/components/banner-section";
 
-
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -29,17 +27,17 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Discover steel almirahs, executive chairs, sofas, dining tables and custom furniture at Ayan Steel — Katihar's premium furniture showroom." },
       { property: "og:title", content: "Ayan Steel — Premium Furniture Showroom" },
       { property: "og:description", content: "Premium furniture and steel solutions in Katihar, Bihar." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "preload", as: "image", href: heroImage, fetchpriority: "high" }],
   }),
   loader: ({ context }) => {
-    context.queryClient.ensureQueryData(featuredProductsQuery);
+    context.queryClient.ensureQueryData(homeProductsQuery);
     context.queryClient.ensureQueryData(carouselProductsQuery);
     context.queryClient.ensureQueryData(categoriesQuery);
     context.queryClient.ensureQueryData(customWorkQuery);
   },
-
-
   pendingMs: 0,
   pendingComponent: HomePending,
   errorComponent: ({ error }) => <ErrorState title="We couldn't load the showroom" error={error} />,
@@ -53,7 +51,7 @@ function HomePending() {
       <HeroSkeleton />
       <section className="container-luxe py-24 md:py-32">
         <PageHeaderSkeleton />
-        <div className="mt-12"><ProductGridSkeleton count={3} /></div>
+        <div className="mt-12"><ProductGridSkeleton count={6} /></div>
       </section>
       <section className="bg-foreground py-24 md:py-32">
         <div className="container-luxe">
@@ -66,20 +64,20 @@ function HomePending() {
 }
 
 function Home() {
-  const { data: featured } = useSuspenseQuery(featuredProductsQuery);
+  const { data: products } = useSuspenseQuery(homeProductsQuery);
   const { data: carouselProducts } = useSuspenseQuery(carouselProductsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: customWork } = useSuspenseQuery(customWorkQuery);
   return (
     <>
       <Hero />
-      <BannerSection />
-      <FeaturedCarousel products={carouselProducts} />
-
       <Marquee />
-      <Featured products={featured} />
+      <Featured products={products} />
+      <FeaturedCarousel products={carouselProducts} />
       <CategoriesSection categories={categories} />
       <WhyUs />
+      <BannerSection />
+      <CustomWorkCta />
       <CustomWorkSection projects={customWork} />
       <Testimonials />
       <ContactCta />
@@ -87,6 +85,10 @@ function Home() {
   );
 }
 
+function scrollToFeatured(e: React.MouseEvent) {
+  e.preventDefault();
+  document.getElementById("featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function Hero() {
   return (
@@ -101,7 +103,7 @@ function Hero() {
       />
       <div className="hero-scrim absolute inset-0" />
 
-      <div className="hero-ink container-luxe relative flex min-h-[100svh] flex-col justify-end pb-24 pt-32">
+      <div className="hero-ink container-luxe relative flex min-h-[100svh] flex-col justify-end pb-28 pt-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,19 +118,20 @@ function Hero() {
             Furniture that <em className="not-italic text-accent">defines</em> your space.
           </h1>
           <p className="hero-dim mt-6 max-w-xl text-base md:text-lg leading-relaxed">
-            Steel almirahs, executive seating, dining sets, sofas and custom-built pieces —
-            curated from India's most trusted brands and our own atelier.
+            Discover quality steel furniture, elegant designs and custom-made pieces
+            crafted for modern homes and businesses.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              to="/products"
-              className="hero-btn inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-medium transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
+          <div className="mt-9 flex flex-wrap gap-3">
+            <a
+              href="#featured"
+              onClick={scrollToFeatured}
+              className="hero-btn inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-gold)]"
             >
-              Explore Collection <ArrowRight className="h-4 w-4" />
-            </Link>
+              Explore Products <ArrowRight className="h-4 w-4" />
+            </a>
             <Link
               to="/contact"
-              className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-6 py-3.5 text-sm font-medium transition-all"
+              className="hero-chip inline-flex items-center gap-2 rounded-full border backdrop-blur px-7 py-3.5 text-sm font-medium transition-all"
             >
               <MapPin className="h-4 w-4" /> Visit Showroom
             </Link>
@@ -147,7 +150,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const items = ["Free Delivery in Katihar", "1-Year Workmanship Warranty", "EMI Available", "Custom Furniture", "19+ Categories", "Trusted Since Years"];
+  const items = ["Free Delivery in Katihar", "1-Year Workmanship Warranty", "EMI Available", "Custom Furniture", "19+ Categories", "Trusted Local Showroom"];
   return (
     <div className="border-y border-border bg-secondary/40 py-4 overflow-hidden">
       <div className="flex gap-12 animate-[scroll_40s_linear_infinite] whitespace-nowrap">
@@ -162,7 +165,7 @@ function Marquee() {
   );
 }
 
-function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+function SectionHeader({ eyebrow, title, sub, invert }: { eyebrow: string; title: string; sub?: string; invert?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -171,21 +174,21 @@ function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="mb-12 max-w-2xl"
     >
-      <span className="text-[11px] uppercase tracking-[0.3em] text-walnut">{eyebrow}</span>
+      <span className={`text-[11px] uppercase tracking-[0.3em] ${invert ? "text-accent" : "text-walnut"}`}>{eyebrow}</span>
       <h2 className="mt-3 font-display text-4xl md:text-5xl leading-[1.05] text-balance-tight">{title}</h2>
-      {sub && <p className="mt-4 text-muted-foreground leading-relaxed">{sub}</p>}
+      {sub && <p className={`mt-4 leading-relaxed ${invert ? "text-background/70" : "text-muted-foreground"}`}>{sub}</p>}
     </motion.div>
   );
 }
 
 function Featured({ products }: { products: ShowroomProduct[] }) {
   return (
-    <section className="container-luxe py-24 md:py-32">
+    <section id="featured" className="container-luxe scroll-mt-24 py-20 md:py-28">
       <div className="flex items-end justify-between gap-6 flex-wrap">
         <SectionHeader
-          eyebrow="Featured Collection"
-          title="Hand-picked pieces, this season."
-          sub="A rotating selection of bestsellers, new arrivals and showroom favourites."
+          eyebrow="Explore Our Collection"
+          title="Featured pieces, ready to view."
+          sub="Real showroom stock — tap any piece to see full specifications, dimensions and pricing."
         />
         <Link to="/products" className="text-sm font-medium hover:text-walnut gold-underline">
           See all products →
@@ -193,14 +196,66 @@ function Featured({ products }: { products: ShowroomProduct[] }) {
       </div>
       {products.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border p-16 text-center text-muted-foreground">
-          No featured products yet. Add some from the admin dashboard.
+          No products yet. Add some from the admin dashboard.
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-        </div>
+        <>
+          <div className="grid gap-5 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+            {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          </div>
+          <div className="mt-12 flex justify-center">
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-medium text-background transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-luxe)]"
+            >
+              View All Products <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </>
       )}
     </section>
+  );
+}
+
+function CategoryTile({ category, index }: { category: ShowroomCategory; index: number }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!category.image) { setSrc(""); return; }
+    getSignedUrl(category.image).then((u) => { if (alive) setSrc(u); });
+    return () => { alive = false; };
+  }, [category.image]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: (index % 8) * 0.05 }}
+    >
+      <Link
+        to="/categories/$slug"
+        params={{ slug: category.slug }}
+        className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-3xl border border-background/15 bg-background/[0.04] p-5 transition-all hover:border-accent/40"
+      >
+        {src ? (
+          <img
+            src={src}
+            alt={category.name}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover opacity-70 transition-transform duration-[1200ms] group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-background/10 to-background/[0.02]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/25 to-transparent" />
+        <div className="relative flex items-center justify-between gap-2">
+          <span className="font-display text-lg leading-tight">{category.name}</span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -209,33 +264,16 @@ function CategoriesSection({ categories }: { categories: ShowroomCategory[] }) {
     <section className="bg-foreground text-background py-24 md:py-32">
       <div className="container-luxe">
         <SectionHeader
-          eyebrow="Shop by Category"
+          invert
+          eyebrow="Browse by Category"
           title="From steel almirahs to walnut dining."
           sub="Carefully curated categories — there's a piece for every room and every purpose."
         />
         {categories.length === 0 ? (
           <p className="text-background/60">No categories yet.</p>
         ) : (
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {categories.map((c, i) => (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.03 }}
-              >
-                <Link
-                  to="/categories"
-                  className="group block rounded-2xl border border-background/15 bg-background/[0.04] px-4 py-5 text-sm hover:bg-background/10 hover:border-accent/40 transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{c.name}</span>
-                    <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-accent" />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {categories.map((c, i) => <CategoryTile key={c.id} category={c} index={i} />)}
           </div>
         )}
       </div>
@@ -245,22 +283,24 @@ function CategoriesSection({ categories }: { categories: ShowroomCategory[] }) {
 
 function WhyUs() {
   const items = [
-    { icon: ShieldCheck, title: "Trusted Quality", text: "Authentic brand-stocked merchandise and our own atelier-grade craftsmanship." },
-    { icon: Truck, title: "Local Delivery", text: "Free delivery and installation across Katihar and surrounding districts." },
-    { icon: Wrench, title: "Custom Built", text: "Bespoke dimensions, finishes and materials — built to your room." },
-    { icon: Sparkles, title: "Honest Pricing", text: "Showroom prices that respect your budget. EMI options on most items." },
+    { icon: ShieldCheck, title: "Quality Steel Furniture", text: "Durable, well-finished steel and wood pieces built to last." },
+    { icon: Wrench, title: "Custom Furniture Available", text: "Bespoke dimensions, finishes and materials — built to your room." },
+    { icon: BadgeIndianRupee, title: "EMI Available", text: "Flexible EMI options on most items so budgets stay comfortable." },
+    { icon: Sparkles, title: "Workmanship Warranty", text: "1-year workmanship warranty on our own atelier-built pieces." },
+    { icon: Store, title: "Trusted Local Showroom", text: "Visit us in Katihar and see every piece in person before buying." },
+    { icon: Truck, title: "Local Delivery", text: "Delivery and installation across Katihar and nearby districts." },
   ];
   return (
     <section className="container-luxe py-24 md:py-32">
       <SectionHeader eyebrow="Why Ayan Steel" title="A showroom built on trust." />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((it, i) => (
           <motion.div
             key={it.title}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
+            transition={{ duration: 0.5, delay: i * 0.07 }}
             className="rounded-3xl border border-border bg-card p-7 hover:shadow-[var(--shadow-luxe)] hover:-translate-y-1 transition-all duration-500"
           >
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-foreground text-background">
@@ -275,20 +315,49 @@ function WhyUs() {
   );
 }
 
+function CustomWorkCta() {
+  return (
+    <section className="container-luxe pb-24 md:pb-32">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden rounded-[2rem] border border-border bg-secondary/50 px-8 py-14 md:px-16 md:py-20 text-center"
+      >
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
+        <span className="text-[11px] uppercase tracking-[0.3em] text-walnut">Custom Furniture</span>
+        <h2 className="mx-auto mt-3 max-w-2xl font-display text-4xl md:text-5xl leading-[1.05] text-balance-tight">
+          Can't find what you're looking for?
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-muted-foreground leading-relaxed">
+          Get furniture designed specifically for your space and requirements — measured,
+          finished and installed by our own team.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link to="/custom-work" className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-all hover:scale-[1.03] hover:shadow-[var(--shadow-luxe)]">
+            Request Custom Work <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link to="/contact" className="inline-flex items-center gap-2 rounded-full border border-border px-7 py-3.5 text-sm font-medium transition-all hover:bg-background">
+            Contact Us
+          </Link>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
 function CustomWorkSection({ projects }: { projects: CustomWork[] }) {
+  if (projects.length === 0) return null;
   return (
     <section className="container-luxe pb-24 md:pb-32">
       <div className="flex items-end justify-between gap-6 flex-wrap">
         <SectionHeader eyebrow="Custom Work" title="Built to your space." sub="Bespoke projects we've delivered for homes, offices, clinics and institutions." />
         <Link to="/custom-work" className="text-sm font-medium hover:text-walnut gold-underline">See all projects →</Link>
       </div>
-      {projects.length === 0 ? (
-        <p className="text-muted-foreground">Custom work projects will appear here as the admin adds them.</p>
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.slice(0, 6).map((p, i) => <CustomWorkTile key={p.id} project={p} index={i} />)}
-        </div>
-      )}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {projects.slice(0, 6).map((p, i) => <CustomWorkTile key={p.id} project={p} index={i} />)}
+      </div>
     </section>
   );
 }
@@ -362,7 +431,7 @@ function ContactCta() {
           <h2 className="mt-3 font-display text-4xl md:text-5xl">Come see it in person.</h2>
           <p className="mt-4 text-background/70 max-w-md leading-relaxed">
             Showroom visits are the best way to experience the craftsmanship. Walk in any day
-            during business hours — chai included.
+            during business hours.
           </p>
           <div className="mt-8 space-y-2 text-sm">
             <div className="text-background/80">{CONTACT.address}</div>
