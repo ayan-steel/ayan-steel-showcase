@@ -201,3 +201,21 @@ export const carouselProductsQuery = queryOptions({
   },
   staleTime: 5 * 60_000,
 });
+
+/** Homepage showcase: featured first, then the rest — capped at 8 cards. */
+export const homeProductsQuery = queryOptions({
+  queryKey: ["showroom", "products", "home"],
+  queryFn: async (): Promise<ShowroomProduct[]> => {
+    const { data, error } = await supabase
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("is_active", true)
+      .order("is_featured", { ascending: false })
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(8);
+    if (error) throw error;
+    return (data ?? []).map(mapProduct);
+  },
+  staleTime: 60_000,
+});
